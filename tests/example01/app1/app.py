@@ -23,6 +23,7 @@ def hello(v,onekey):
     # return v+onekey, 200, {'Content-Type': 'text/html'}
     # return [v,onekey]
     # return 'hello world'
-    # return {v: onekey}
+    return {v: onekey}, 20
     # return 120
-    # return 120.78
+    # return 120.78, 30
+    # return v,onekey
