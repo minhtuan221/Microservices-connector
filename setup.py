@@ -2,6 +2,7 @@
 import microservices_connector
 from setuptools import setup, find_packages
 
+# python setup.py register -r pypi
 # python setup.py sdist bdist_wheel
 # twine upload dist/*
 
@@ -19,26 +20,32 @@ except (IOError, ImportError):
 
 setup(
     name='microservices_connector',
-    version=microservices_connector.__version__,
-    description='Microservices connector provides inter-services communication by http',
+    version='0.1.1',
+    description='Inter-Service communication framework, support for microservice architecture and distributed system via http',
     long_description=readme,
-    author=microservices_connector.__author__,
+    author='Minh Tuan Nguyen',
     author_email='ntuan221@gmail.com',
-    license='MIT',
-    platforms=['POSIX'],
-    url='https://github.com/minhtuan221/cython-npm',
+    license='BSD',
+    platforms='any',
+    url='https://github.com/minhtuan221/Microservices-connector',
     classifiers=[
         'Development Status :: 3 - Alpha',
-        'License :: OSI Approved :: MIT License',
-        'Environment :: Console',
-        'Operating System :: POSIX',
+        'License :: OSI Approved :: BSD License',
+        'Environment :: Web Environment',
+        'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6', ],
+        'Programming Language :: Python :: 3.6', 
+        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
+        'Topic :: Software Development :: Libraries :: Application Frameworks',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        ],
+    keywords=['microservice', 'http', 'flask'],
     # entry_points={'console_scripts': [
     #     'microservices_connector = microservices_connector:main',
     # ]},
     packages=find_packages(exclude=('test*', 'testpandoc*')),
     include_package_data=False,
-    install_requires=['flask>=0.12'],
+    install_requires=['flask>=0.12','cython_npm','requests'],
 )
