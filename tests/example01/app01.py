@@ -1,0 +1,95 @@
+from cython_npm.cythoncompile import require
+from functools import wraps
+module = require('../../microservices_connector/Interservices')
+Microservice = module.Microservice
+
+# app = Flask(__name__)
+M = Microservice(__name__)
+
+# run a normal function in python
+print('one cat here')
+
+# test return string
+@M.typing('/str')
+@M.reply
+def string1(a,key):
+    return a+'-'+key
+
+# test return multiple string
+@M.typing('/str2')
+@M.reply
+def string2(a, key):
+    return a, key, a+'-'+key
+
+# test return Integer and float
+@M.typing('/int')
+@M.reply
+def int1(a, key):
+    return a+key
+
+
+@M.typing('/float')
+@M.reply
+def float2(a, key):
+    return a+key
+
+
+@M.typing('/int3')
+@M.reply
+def int3(a, key):
+    return a+key, key*key, a*a
+
+# test return list and dict
+@M.typing('/list')
+@M.reply
+def list1(a, key):
+    a.extend(key)
+    return a
+
+
+@M.typing('/dict')
+@M.reply
+def dict1(a, key):
+    key['dict'] = a
+    return key
+
+
+@M.typing('/list3')
+@M.reply
+def list3(a, key):
+    key.append('other value')
+    c = None
+    return a, key, c
+
+
+@M.typing('/None')
+@M.reply
+def TestNoneValue(a, key):
+    key.append('Do something in the server')
+
+class testservice(object):
+    name = 'test'
+    Purpose = 'For test only'
+    empty = None
+    def __init__(self, value):
+        self.value = value
+
+    def onemethod(self):
+        pass
+
+
+@M.typing('/class',token='123456')
+@M.reply
+def TestClass(a, key):
+    t = testservice(a)
+    return t
+
+
+@M.typing('/class2', token='123456')
+@M.reply
+def TestClass2(a, key):
+    t = testservice(key)
+    return t, a, None
+# Option 1: run Microservice within file it's created
+if __name__ == '__main__':
+    M.run(port=5000, host='0.0.0.0', debug=True)

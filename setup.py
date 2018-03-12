@@ -36,9 +36,9 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6', ],
     # entry_points={'console_scripts': [
-    #     'cython_npm = cython_npm:main',
+    #     'microservices_connector = microservices_connector:main',
     # ]},
     packages=find_packages(exclude=('test*', 'testpandoc*')),
     include_package_data=False,
-    install_requires=['cython>=0.27.3'],
+    install_requires=['flask>=0.12'],
 )

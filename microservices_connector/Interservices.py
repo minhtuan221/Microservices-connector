@@ -1,5 +1,6 @@
 from flask import Flask, Response
 from flask import request, jsonify
+import inspect
 import json
 from functools import wraps
 import requests
@@ -18,19 +19,6 @@ def timeit(method):
         return result
 
     return timed
-
-
-def typing(text: str):
-    res = text
-    try:
-        res = json.loads(text)['res']
-    except Exception as error:
-        print(error)
-        try:
-            res = json.loads('{"res":{}}'.format(text))['res']
-        except Exception:
-            pass
-    return res
 
 
 class FlaskResponse(Response):
@@ -128,10 +116,16 @@ def microResponse(*args):
     if len(args) == 0:
         return final
     else:
-        args = list(args[0])
+        args = list(args,)
         print(args)
-        for i in args:
-            final['res'].append(oneResponse(i))
+        for arg in args:
+            if isinstance(arg, tuple):
+                arg = list(arg)
+                print(arg)
+                for i in arg:
+                    final['res'].append(oneResponse(i))
+            else:
+                final['res'].append(oneResponse(arg))
     return final
 
 
@@ -141,13 +135,13 @@ def oneResponse(res):
     elif isinstance(res, (dict, float, int, str)):
         return {'obj': res}
     elif isinstance(res, list):
-        return {'obj': listToJson(res)}
+        return {'obj': list(res)}
     elif isinstance(res, tuple):
         return {'obj': list(res)}
     elif isinstance(res, object):
-        return {'obj': objToJson(res)}
+        return {'obj': propsOBJ(res)}
     else:
-        return {'type': 'error', 'obj': 'Object type is not supported'}
+        return {'Error': 'Object type is not support', 'obj': 'Object type is not support'}
 
 # send mess to a microservices. It's a friend
 
@@ -158,6 +152,7 @@ class Friend(object):
         self.address = address
         self.token = token
         self.lastMessage = None
+        self.lastreply = None
         self.ruleMethods = ruleMethods
 
     def setRule(self, rule: str, method: str = None, token: str = None):
@@ -190,12 +185,13 @@ class Friend(object):
         else:
             r = requests.post(self.address+rule,
                               json=jsonsend)
-        print(r.headers)
+        # print(r.headers)
+        self.lastreply = r
         # print(r.text)
         if r.status_code == 200:
-            print(r.headers['Content-Type'] == 'application/json')
+            # print(r.headers['Content-Type'] == 'application/json')
             if r.headers['Content-Type'] == 'application/json':
-                print(r.text)
+                # print(r.text)
                 res = r.json()
                 try:
                     # res = json.loads(res['res'])
@@ -204,6 +200,8 @@ class Friend(object):
                         final = []
                         for arg in res['res']:
                             final.append(arg['obj'])
+                        if len(final)<=1:
+                            return final[0]
                         return final
                     else:
                         final = res
@@ -216,6 +214,16 @@ class Friend(object):
         self.lastMessage = None
         return None
 
+
+
+
+def propsOBJ(obj):
+    pr = {}
+    for name in dir(obj):
+        value = getattr(obj, name)
+        if not name.startswith('__') and not inspect.ismethod(value):
+            pr[name] = value
+    return pr
 
 def objToJson(item):
     """[Convert from class to Dict(). The idea is the same as bean in java]
@@ -249,5 +257,5 @@ def listToJson(data):
     """
     Json = list()
     for item in data:
-        Json.append(objToJson(item))
+        Json.append(propsOBJ(item))
     return Json

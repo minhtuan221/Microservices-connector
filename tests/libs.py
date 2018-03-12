@@ -1,6 +1,7 @@
 
 # send json by request and received
 import requests
+from flask import request, Response
 r = requests.post('http://httpbin.org/post', json={"key": "value"})
 r.status_code
 r.json()
@@ -8,7 +9,7 @@ r.json()
 # receive json in flask
 @app.route('/api/add_message/<uuid>', methods=['GET', 'POST'])
 def add_message(uuid):
-    if requests.is_json():
+    if request.is_json():
         content = request.json
         print(content)
     return uuid
@@ -102,9 +103,32 @@ class MyResponse3(Response):
 
 
 # Determining Content Type Automatically
-class MyResponse(Response):
+class MyResponse4(Response):
     def __init__(self, response, **kwargs):
         if 'mimetype' not in kwargs and 'contenttype' not in kwargs:
             if response.startswith('<?xml'):
                 kwargs['mimetype'] = 'application/xml'
         return super(MyResponse, self).__init__(response, **kwargs)
+
+
+def my_decorator(f):
+    @wraps(f)
+    def wrapper(*args, **kwds):
+        print('Calling decorated function')
+        return f(*args, **kwds)
+    return wrapper
+
+
+def typing(text: str):
+    res = text
+    try:
+        res = json.loads(text)['res']
+        print(res, 'try 1')
+    except Exception as error:
+        print(error)
+        try:
+            res = json.loads('{"res":{}}'.format(text))['res']
+            print(res, 'try 2')
+        except Exception:
+            pass
+    return res
