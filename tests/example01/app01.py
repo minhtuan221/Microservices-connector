@@ -61,7 +61,7 @@ def list3(a, key):
     c = None
     return a, key, c
 
-
+# return None, class Object
 @M.typing('/None')
 @M.reply
 def TestNoneValue(a, key):
