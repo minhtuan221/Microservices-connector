@@ -37,7 +37,15 @@ class FlaskResponse(Response):
 
 
 class Microservice(object):
-    # friendList = {'name':{'address':'name','token':'abcxyz'}}
+    """Microservice(name, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None)
+    
+    Arguments:
+        name {str} -- Require a name for your app, recommend put __name__ for it
+        port {int} -- Choose from 3000 to 9000, default to 5000
+        host {str} -- Host ip, Default 0.0.0.0 for localhost
+        debug {boolean} -- True for development, False/None for production
+        token {dict} -- A dict contain all rule and its token. It can be set later
+    """
     def __init__(self, name, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None, **kwargs):
         self.app = Flask(name)
         self.port = port

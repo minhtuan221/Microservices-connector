@@ -45,7 +45,7 @@ setup(
     # entry_points={'console_scripts': [
     #     'microservices_connector = microservices_connector:main',
     # ]},
-    packages=find_packages(exclude=('test*', 'testpandoc*')),
+    packages=find_packages(exclude=('test*', 'testpandoc*','image*')),
     include_package_data=False,
     install_requires=['flask>=0.12','cython_npm','requests'],
 )
