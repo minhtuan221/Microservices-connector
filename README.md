@@ -159,7 +159,7 @@ print('y=', y, type(y))
 print('z=', z, type(z))
 
 print(
-        """##############################
+    """##############################
     Test return a int, float
     """)
 F = Friend('app1', 'http://localhost:5000')
@@ -235,7 +235,7 @@ z= 9.87656329 <class 'float'>
 ```
 Note: print('one cat here') print in the screen of listener. You can run any other python function, python code as normal in listener.
 
-### 5. Send and reply list, dict, class attribute
+### 5. Send and reply list, dict
 
 In the sender side, you can send data type as the code below:
 ```
@@ -255,29 +255,6 @@ print('==========================')
 print('Test: return multiple Value')
 x, y, z = F.send('/list3', {'keyword': ['anything']},
                     key=['abc', 'zyz'])
-print('x=', x, type(x))
-print('y=', y, type(y))
-print('z=', z, type(z))
-
-print(
-        """##############################
-    Test return NoneType, Class, use of Token
-    """)
-F = Friend('app1', 'http://localhost:5000')
-print('Test: return a simple Value')
-x = F.send('/None', [12, 34, 45], key=['abc', 'zyz'])
-print('x=', x, type(x))
-print('==========================')
-print('Test: return a simple Value with token')
-F.setRule('/class', token='123456')
-x = F.send('/class', {'keyword': ['anything']},
-            key={'int': 20, 'str': 'adfafsa', 'float': 0.2323})
-print('x=', x, type(x))
-print('==========================')
-print('Test: return multiple Value')
-F.setRule('/class2', token='123456')
-x,y,z = F.send('/class2', {'keyword': ['anything']},
-            key={'int': 20, 'str': 'adfafsa', 'float': 0.2323})
 print('x=', x, type(x))
 print('y=', y, type(y))
 print('z=', z, type(z))
@@ -305,7 +282,51 @@ def list3(a, key):
     key.append('other value')
     c = None
     return a, key, c
+```
+After that, first run listener then run sender. We have results (for full example see tests/example01):
+```
+Test: return a simple Value
+x= [12, 34, 45, 'abc', 'zyz'] <class 'list'>
+==========================
+Test: return a simple Value
+x= {'dict': {'keyword': ['anything']}, 'float': 0.2323, 'int': 20, 'str': 'adfafsa'} <class 'dict'>
+==========================
+Test: return multiple Value
+x= {'keyword': ['anything']} <class 'dict'>
+y= ['abc', 'zyz', 'other value'] <class 'list'>
+z= None <class 'NoneType'>
+'testListDict'  22.19 ms
+```
 
+### 6. Send and reply void, Nonetype, class attributes and use of token
+In the sender side, you can send data type as the code below:
+```
+print(
+    """##############################
+    Test return NoneType, Class, use of Token
+    """)
+F = Friend('app1', 'http://localhost:5000')
+print('Test: return a simple Value')
+x = F.send('/None', [12, 34, 45], key=['abc', 'zyz'])
+print('x=', x, type(x))
+print('==========================')
+print('Test: return a simple Value with token')
+F.setRule('/class', token='123456')
+x = F.send('/class', {'keyword': ['anything']},
+            key={'int': 20, 'str': 'adfafsa', 'float': 0.2323})
+print('x=', x, type(x))
+print('==========================')
+print('Test: return multiple Value')
+F.setRule('/class2', token='123456')
+x,y,z = F.send('/class2', {'keyword': ['anything']},
+            key={'int': 20, 'str': 'adfafsa', 'float': 0.2323})
+print('x=', x, type(x))
+print('y=', y, type(y))
+print('z=', z, type(z))
+```
+
+In the listener, you can reply/return data type as string, integer, float as below:
+```
 # return None, class Object
 @M.typing('/None')
 @M.reply
@@ -338,19 +359,8 @@ def TestClass2(a, key):
 ```
 After that, first run listener then run sender. We have results (for full example see tests/example01):
 ```
-Test: return a simple Value
-x= [12, 34, 45, 'abc', 'zyz'] <class 'list'>
-==========================
-Test: return a simple Value
-x= {'dict': {'keyword': ['anything']}, 'float': 0.2323, 'int': 20, 'str': 'adfafsa'} <class 'dict'>
-==========================
-Test: return multiple Value
-x= {'keyword': ['anything']} <class 'dict'>
-y= ['abc', 'zyz', 'other value'] <class 'list'>
-z= None <class 'NoneType'>
-'testListDict'  22.19 ms
 ##############################
-    Test return NoneType, Class, use of Token
+Test return NoneType, Class, use of Token
 
 Test: return a simple Value
 x= None <class 'NoneType'>
