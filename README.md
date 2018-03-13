@@ -12,6 +12,7 @@ _Microservices Connector_ is a Inter-Service communication framework written in 
 * Distributed system
 
 ![alt text](images/Distributed-system.jpeg  "Illustration of network system. Source:medium.com")
+
 Illustration of network system. Source:medium.com
 
 As illustration, distributed systems are very stable and Infinite scalability. But distributed systems are the most difficult to maintain
@@ -125,7 +126,7 @@ F = Friend('Corgi', 'http://0.0.0.0:5000') # this is: you're finding friend in y
 message = F.send('/helloworld','Mr. Close friend') # then you can send him a message
 ```
 
-`/helloworld` is the rule/topic you say/ask to a friend or the route in http. It need to start with `/`. The rule must match with the rule of `Typing` to be replied. `Mr. Close friend` is what you are talking about, which can be string, integer, float, list, dict or class.
+`/helloworld` is the rule/topic you say/ask to a friend or the route in http. It need to start with `/`. The rule must match with the rule of `Typing` to be replied. `Mr. Close friend` is what you are talking about, which can be string, integer, float, list, dict or class. For example: `F.send('/topic',variable1, variable2, keyword1='secret key')`
 
 In other side, your friend or a microservice or a listener has the following process:
 ```
@@ -232,7 +233,7 @@ x= 1000000003.1427 <class 'float'>
 y= 1000000000000000000 <class 'int'>
 z= 9.87656329 <class 'float'>
 ```
-Note: print('one cat here') print in the screen of listener
+Note: print('one cat here') print in the screen of listener. You can run any other python function, python code as normal in listener.
 
 ### 5. Send and reply list, dict, class attribute
 
@@ -363,9 +364,41 @@ y= {'keyword': ['anything']} <class 'dict'>
 z= None <class 'NoneType'>
 'testClassType'  19.20 ms
 ```
+A Detail User Guide will comming soon...
+## Pros vs Cons and question
+From my opinion only, Microservice connector has the following Pros and Cons to improve
+### Pros:
+* Ease of use, Ease of development, you don't need to touch on http connection
+* Can build decentralize or Distributed system with Infinite scalability
+* Send and receive data with many types as string, int, float, list, dict.
+* Connect all around the world with internet
+
+### Cons:
+* Do not support send/receive tuple and set type (because I don't like them).
+* Do not support send/receive a whole class, return of decorator and server-side computer
+* Is not really fast log-broker server as RabbitMQ, ZeroMQ, kafka: *yes, oneService cannot send 10 million message per second like them, but it has other advance.*
+* Do not support Database, user/role management, system manager: *not yet, we are trying to write new feature include them. We welcome any contributor support us.*
+
+### Question:
+* Why not a load balancer ?
+
+> *It is out of range. Load balancer cover the other layer. Other package can handle it better. But we consider to add a custom function for it.*
+
+* What about support more options, async/await ?
+
+> *We are trying to connect by Sanic and Japronto soon*
+
+* What about data integrity, blockchain, token ?
+
+> *We are trying to add them, but cannot be soon*
+
 ## Authors
 
 * **Tuan Nguyen Minh** - *Financer and Developer* - email: ntuan221@gmail.com
+
+Thank for the framework and its authors:
+* flask - micro webframework
+* requests
 
 Favourite idioms:
 * Don't repeat your self
