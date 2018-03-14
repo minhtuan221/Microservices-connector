@@ -20,7 +20,7 @@ except (IOError, ImportError):
 
 setup(
     name='microservices_connector',
-    version='0.1.3',
+    version='0.1.4',
     description='Inter-Service communication framework, support for microservice architecture and distributed system via http',
     long_description=readme,
     author='Minh Tuan Nguyen',

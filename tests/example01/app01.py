@@ -18,8 +18,8 @@ def string1(a,key):
 # test return multiple string
 @M.typing('/str2')
 @M.reply
-def string2(a, key):
-    return a, key, a+'-'+key
+def string2(a, b, key):
+    return a, key, b+'-'+key
 
 # test return Integer and float
 @M.typing('/int')
@@ -36,8 +36,8 @@ def float2(a, key):
 
 @M.typing('/int3')
 @M.reply
-def int3(a, key):
-    return a+key, key*key, a*a
+def int3(a, key, key2):
+    return a+key2, key*key, a*a
 
 # test return list and dict
 @M.typing('/list')
@@ -75,7 +75,7 @@ class testservice(object):
         self.value = value
 
     def onemethod(self):
-        pass
+        print('This is test class')
 
 
 @M.typing('/class',token='123456')
@@ -90,6 +90,16 @@ def TestClass(a, key):
 def TestClass2(a, key):
     t = testservice(key)
     return t, a, None
+
+
+@M.typing('/class3', token='123456')
+@M.reply
+def TestClass3(a, key):
+    x = testservice(key)
+    y = testservice(a)
+    z = [y,x]
+    return x, y, z 
+
 # Option 1: run Microservice within file it's created
 if __name__ == '__main__':
     M.run(port=5000, host='0.0.0.0', debug=True)

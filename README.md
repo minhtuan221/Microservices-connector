@@ -302,9 +302,9 @@ z= None <class 'NoneType'>
 In the sender side, you can send data type as the code below:
 ```
 print(
-    """##############################
-    Test return NoneType, Class, use of Token
-    """)
+"""##############################
+Test return NoneType, Class, use of Token
+""")
 F = Friend('app1', 'http://localhost:5000')
 print('Test: return a simple Value')
 x = F.send('/None', [12, 34, 45], key=['abc', 'zyz'])
@@ -320,6 +320,17 @@ print('Test: return multiple Value')
 F.setRule('/class2', token='123456')
 x,y,z = F.send('/class2', {'keyword': ['anything']},
             key={'int': 20, 'str': 'adfafsa', 'float': 0.2323})
+print('x=', x, type(x))
+print('y=', y, type(y))
+print('z=', z, type(z))
+
+# Test send class and list of class object
+print('\n Test: send class and list of class object')
+F.setRule('/class3', token='123456')
+t1 = testservice('value1')
+t2 = testservice('value2')
+x, y, z = F.send('/class3', [t1,t2],
+                    key={'t1': t1, 't2': t2, 'list': [t1, t2]})
 print('x=', x, type(x))
 print('y=', y, type(y))
 print('z=', z, type(z))
@@ -356,6 +367,14 @@ def TestClass(a, key):
 def TestClass2(a, key):
     t = testservice(key)
     return t, a, None
+
+@M.typing('/class3', token='123456')
+@M.reply
+def TestClass3(a, key):
+    x = testservice(key)
+    y = testservice(a)
+    z = [y,x]
+    return x, y, z 
 ```
 After that, first run listener then run sender. We have results (for full example see tests/example01):
 ```
@@ -372,6 +391,11 @@ Test: return multiple Value
 x= {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': {'float': 0.2323, 'int': 20, 'str': 'adfafsa'}} <class 'dict'>
 y= {'keyword': ['anything']} <class 'dict'>
 z= None <class 'NoneType'>
+
+Test: send class and list of class object
+x= {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': {'list': [{'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value1'}, {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value2'}], 't1': {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value1'}, 't2': {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value2'}}} <class 'dict'>
+y= {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': [{'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value1'}, {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value2'}]} <class 'dict'>
+z= [{'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': [{'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value1'}, {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value2'}]}, {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': {'list': [{'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value1'}, {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value2'}], 't1': {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value1'}, 't2': {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value2'}}}] <class 'list'>
 'testClassType'  19.20 ms
 ```
 A Detail User Guide will comming soon...

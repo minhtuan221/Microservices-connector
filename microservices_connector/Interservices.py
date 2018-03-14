@@ -57,17 +57,6 @@ class Microservice(object):
 
     def init_app(self, **kwargs):
         self.app.response_class = FlaskResponse
-        # @self.app.after_request
-        # def after(response):
-        #     # if response.headers['Content-Type'] == 'application/json':
-        #     #     if isinstance(response.get_data().decode('utf-8'), str):
-        #     # print(json.dumps(response.get_data().decode('utf-8')))
-        #     # print(type(response.get_data().decode('utf-8')))
-        #     # response.headers['Content-Type'] == 'application/json'
-        #     d = {"res": json.loads(json.dumps(response.get_data().decode('utf-8')))}
-        #     # print(response.headers)
-        #     response.set_data(json.dumps(d))
-        #     return response
 
     def remove(self, token: str):
         return self.token.pop(token, None)
@@ -96,10 +85,9 @@ class Microservice(object):
             content = request.get_json(silent=True)
             if content is not None:
                 if 'token' in content:
-                    # print(request.script_root)
                     # print(request.path)
                     if self.token[request.path] != content['token'] and self.token[request.path] == None:
-                        # print(self.token[request.path] is not None) will return true, no answer why
+                        # print(self.token[request.path] is not None) will return true !!
                         return {'type': 'error', 'obj': 'Token is wrong'}
                     # check token
                 if args is not None:
@@ -131,25 +119,31 @@ def microResponse(*args):
                 arg = list(arg)
                 print(arg)
                 for i in arg:
-                    final['res'].append(oneResponse(i))
+                    final['res'].append({'obj':oneResponse(i)})
             else:
-                final['res'].append(oneResponse(arg))
+                final['res'].append({'obj':oneResponse(arg)})
     return final
 
 
 def oneResponse(res):
     if res is None:
-        return {'obj': None}
-    elif isinstance(res, (dict, float, int, str)):
-        return {'obj': res}
-    elif isinstance(res, list):
-        return {'obj': list(res)}
-    elif isinstance(res, tuple):
-        return {'obj': list(res)}
+        return None
+    elif isinstance(res, (float, int, str)):
+        return res
+    elif isinstance(res, (list, tuple)):
+        return [oneResponse(i) for i in res]
+    elif isinstance(res, (dict, set)):
+        resDict = {}
+        for i in res:
+            resDict[i] = oneResponse(res[i])
+        return resDict
     elif isinstance(res, object):
-        return {'obj': propsOBJ(res)}
+        try:
+            return propsOBJ(res)
+        except Exception:
+            return 'Error: Object type is not supported!'
     else:
-        return {'Error': 'Object type is not support', 'obj': 'Object type is not support'}
+        return 'Error: Object type is not supported!'
 
 # send mess to a microservices. It's a friend
 
@@ -168,14 +162,20 @@ class Friend(object):
         self.token[rule] = token
 
     def send(self, rule: str, *args, **kwargs):
-        listargs = None
-        if args is not None:
-            listargs = list(args)
+        listargs = []
+        if len(args)>0:
+            for i in list(args):
+                listargs.append(oneResponse(i))
+        dictkwargs = dict()
+        if len(kwargs)>0:
+            kwargs = dict(kwargs)
+            for i in kwargs:
+                dictkwargs[i] = oneResponse(kwargs[i])
         if rule in self.token:
             token = self.token[rule]
         else:
             token = None
-        jsonsend = {"args": listargs, 'kwargs': kwargs, 'token': token}
+        jsonsend = {"args": listargs, 'kwargs': dictkwargs, 'token': token}
         if rule in self.ruleMethods:
             method = self.ruleMethods[rule]
             if method == 'GET':
@@ -232,38 +232,3 @@ def propsOBJ(obj):
         if not name.startswith('__') and not inspect.ismethod(value):
             pr[name] = value
     return pr
-
-def objToJson(item):
-    """[Convert from class to Dict(). The idea is the same as bean in java]
-
-    Arguments:
-        item {[class]} -- [any type of class have __dict__ readable]
-
-    Returns:
-        [dict] -- [contain all method self.* of class]
-    """
-    obj = dict()
-    for key in item.__dict__.keys():
-        try:
-            if isinstance(item.__getattribute__(key), str) or isinstance(item.__getattribute__(key), int) or isinstance(item.__getattribute__(key), float) or isinstance(item.__getattribute__(key), dict) or isinstance(item.__getattribute__(key), list):
-                obj[key] = item.__getattribute__(key)
-        except:
-            continue
-    return obj
-
-
-def listToJson(data):
-    """[Convert __dict__ of classes in a list into dicts in a list]
-    Arguments:
-        data {[Object]} -- [Class type have self.*, such as sqlalchemy.query object]
-    Returns:
-        [Collection] -- [list of dicts] like below
-        [
-            {'id':1, 'tradingDate':'2018-01-01', 'symbol':'ABC', 'close':10.500,....},
-            ...
-        ]
-    """
-    Json = list()
-    for item in data:
-        Json.append(propsOBJ(item))
-    return Json

@@ -79,7 +79,7 @@ def testStr():
     print('x=', x, type(x))
     print('==========================')
     print('Test: return multiple string')
-    x, y, z = F.send('/str2', 'A variable value',
+    x, y, z = F.send('/str2', 'A variable value','second Variable',
                   key='A keyword variable value')
     print('x=' ,x, type(x))
     print('y=', y, type(y))
@@ -115,7 +115,7 @@ def testInt():
     print('==========================')
     print('Test: return multiple Value')
     x, y, z = F.send('/int3', 3.1427,
-                     key=1000000000)
+                     key=1000000000, key2=2.71230)
     print('x=', x, type(x))
     print('y=', y, type(y))
     print('z=', z, type(z))
@@ -173,6 +173,18 @@ z= None <class 'NoneType'>
 """
 
 
+class testservice(object):
+    name = 'test'
+    Purpose = 'For test only'
+    empty = None
+
+    def __init__(self, value):
+        self.value = value
+
+    def onemethod(self):
+        print('This is test class')
+
+
 @timeit
 def testClassType():
     print(
@@ -197,6 +209,18 @@ def testClassType():
     print('x=', x, type(x))
     print('y=', y, type(y))
     print('z=', z, type(z))
+
+    # Test send class and list of class object
+    print('Test: send class and list of class object')
+    F.setRule('/class3', token='123456')
+    t1 = testservice('value1')
+    t2 = testservice('value2')
+    x, y, z = F.send('/class3', [t1,t2],
+                     key={'t1': t1, 't2': t2, 'list': [t1, t2]})
+    print('x=', x, type(x))
+    print('y=', y, type(y))
+    print('z=', z, type(z))
+
 
 
 testClassType()
