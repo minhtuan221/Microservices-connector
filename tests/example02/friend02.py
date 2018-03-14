@@ -5,6 +5,7 @@ from cython_npm.cythoncompile import require
 # from ../
 Interservices = require('../../microservices_connector/Interservices')
 Friend = Interservices.Friend
+# test sanic app
 
 def timeit(method):
 

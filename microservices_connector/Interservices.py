@@ -21,21 +21,6 @@ def timeit(method):
     return timed
 
 
-class FlaskResponse(Response):
-    default_mimetype = 'application/json'
-    # set default content-type to json
-
-    @classmethod
-    def force_type(cls, rv, environ=None):
-        # rv = jsonify(res=rv)
-        # print(rv)
-        if isinstance(rv, (dict, list, int, float)):
-            rv = jsonify(rv) 
-        # if isinstance(rv, (int)):
-        #     rv = jsonify(int=rv)
-        return super(FlaskResponse, cls).force_type(rv, environ)
-
-
 class Microservice(object):
     """Microservice(name, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None)
     
@@ -47,21 +32,22 @@ class Microservice(object):
         token {dict} -- A dict contain all rule and its token. It can be set later
     """
     def __init__(self, name, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None, **kwargs):
-        self.app = Flask(name)
         self.port = port
         self.host = host
         self.debug = debug
         self.token = token
         self.secretKey = secretKey
-        self.init_app(**kwargs)
+        self.init_app(name, **kwargs)
 
-    def init_app(self, **kwargs):
-        self.app.response_class = FlaskResponse
+    def init_app(self, name, **kwargs):
+        self.app = Flask(name)
 
     def remove(self, token: str):
         return self.token.pop(token, None)
 
     def typing(self, rule: str, **options):
+        if not rule.startswith('/'):
+            rule = '/' + rule
         def decorator(f):
             endpoint = options.pop('endpoint', None)
             methods = options.pop('methods', None)
@@ -72,7 +58,7 @@ class Microservice(object):
                 raise ValueError('Token must be a string')
             # if the methods are not given and the view_func object knows its
             # methods we can use that instead.  If neither exists, we go with
-            # a tuple of only ``GET`` as default.
+            # a tuple of only ``POST`` as default.
             if methods is None:
                 options['methods'] = ('POST',)
             self.app.add_url_rule(rule, endpoint, f, **options)
@@ -99,30 +85,29 @@ class Microservice(object):
             else:
                 raise ValueError('Request contain no json')
             # print(request.headers)
-            return microResponse(f(*args, **kwargs))
+            return self.microResponse(f(*args, **kwargs))
         return wrapper
 
     def run(self, **kwargs):
         self.app.run(**kwargs)
 
-
-def microResponse(*args):
-    final = {'res': []}
-    print(len(args), type(args))
-    if len(args) == 0:
-        return final
-    else:
-        args = list(args,)
-        print(args)
-        for arg in args:
-            if isinstance(arg, tuple):
-                arg = list(arg)
-                print(arg)
-                for i in arg:
-                    final['res'].append({'obj':oneResponse(i)})
-            else:
-                final['res'].append({'obj':oneResponse(arg)})
-    return final
+    def microResponse(self, *args):
+        final = {'res': []}
+        print(len(args), type(args))
+        if len(args) == 0:
+            return final
+        else:
+            args = list(args,)
+            print(args)
+            for arg in args:
+                if isinstance(arg, tuple):
+                    arg = list(arg)
+                    print(arg)
+                    for i in arg:
+                        final['res'].append({'obj':oneResponse(i)})
+                else:
+                    final['res'].append({'obj':oneResponse(arg)})
+        return jsonify(final)
 
 
 def oneResponse(res):
@@ -151,6 +136,8 @@ def oneResponse(res):
 class Friend(object):
     def __init__(self, name: str, address: str, token: dict = {}, ruleMethods: dict = {}):
         self.name = name
+        if not address.startswith('http://') and not address.startswith('https://'):
+            address = 'http://'+address
         self.address = address
         self.token = token
         self.lastMessage = None
@@ -223,8 +210,6 @@ class Friend(object):
         return None
 
 
-
-
 def propsOBJ(obj):
     pr = {}
     for name in dir(obj):
@@ -232,3 +217,96 @@ def propsOBJ(obj):
         if not name.startswith('__') and not inspect.ismethod(value):
             pr[name] = value
     return pr
+
+
+from sanic import Sanic
+from sanic import response
+
+
+class SanicApp(Microservice):
+    def __init__(self, name=None, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None, **kwargs):
+        super().__init__(name, port, host, debug, token, secretKey, **kwargs)
+
+    def init_app(self, name, **kwargs):
+        self.app = Sanic(name)
+
+    def typing(self, uri, methods=['POST'], token=None, host=None,
+               strict_slashes=None, stream=False, version=None, name=None):
+        """Decorate a function to be registered as a route
+
+        :param uri: path of the URL
+        :param methods: list or tuple of methods allowed
+        :param host:
+        :param strict_slashes:
+        :param stream:
+        :param version:
+        :param name: user defined route name for url_for
+        :return: decorated function
+        """
+
+        # Fix case where the user did not prefix the URL with a /
+        # and will probably get confused as to why it's not working
+        if not uri.startswith('/'):
+            uri = '/' + uri
+
+        if stream:
+            self.app.is_request_stream = True
+
+        if strict_slashes is None:
+            strict_slashes = self.app.strict_slashes
+        
+        try:
+            self.token[uri] = str(token)
+        except:
+            raise ValueError('Token must be a string')
+
+        def response(handler):
+            if stream:
+                handler.is_stream = stream
+            self.app.router.add(uri=uri, methods=methods, handler=handler,
+                            host=host, strict_slashes=strict_slashes,
+                            version=version, name=name)
+            return handler
+
+        return response
+
+    def reply(self, f):
+        @wraps(f)
+        def wrapper(sanicRequest, *args, **kwargs):
+            content = sanicRequest.json
+            if content is not None:
+                if 'token' in content:
+                    # print(request.path)
+                    if self.token[sanicRequest.path] != content['token'] and self.token[sanicRequest.path] == None:
+                        # print(self.token[request.path] is not None) will return true !!
+                        return {'type': 'error', 'obj': 'Token is wrong'}
+                    # check token
+                if args is not None:
+                    for arg in content['args']:
+                        args += (arg,)
+                if kwargs is not None:
+                    for key in content['kwargs']:
+                        kwargs[key] = content['kwargs'][key]
+            else:
+                raise ValueError('Request contain no json')
+            # print(request.headers)
+            return self.microResponse(f(*args, **kwargs))
+        return wrapper
+    
+    def microResponse(self, *args):
+        final = {'res': []}
+        print(len(args), type(args))
+        if len(args) == 0:
+            return final
+        else:
+            args = list(args,)
+            print(args)
+            for arg in args:
+                if isinstance(arg, tuple):
+                    arg = list(arg)
+                    print(arg)
+                    for i in arg:
+                        final['res'].append({'obj': oneResponse(i)})
+                else:
+                    final['res'].append({'obj': oneResponse(arg)})
+        return response.json(final)

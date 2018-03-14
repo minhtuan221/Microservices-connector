@@ -15,8 +15,11 @@ _Microservices Connector_ is a Inter-Service communication framework written in 
 
 Illustration of network system. Source:medium.com
 
-As illustration, distributed systems are very stable and Infinite scalability. But distributed systems are the most difficult to maintain
+As illustration, distributed systems are very stable and Infinite scalability. But distributed systems are the most difficult to maintain.
 
+_Microservices Connector_ supports communication by the following framework:
+* flask - A micro web framework
+* Sanic - Gotta go fast (A async web framework)
 ### Quickstart:
 
 Microservices Connector is available on pip. You can install via pip (require python>=3.5):
@@ -67,10 +70,16 @@ You get the result: `Welcome Mr. Developer` in terminal of app2.py. This is no d
 ### 1. Start your first app
 
 In the tutorial, we assume you have this code in the top of your file.
+
 ```
 from microservices_connector.Interservices import Microservice
 
 M = Microservice(__name__)
+
+# for Sanic framework if you want to use sanic instead of flask
+from microservices_connector.Interservices import SanicApp as Microservice
+
+Msanic = Microservice(__name__)
 ``` 
 Now, look closer at `Microservice(__name__)`, it actually look like this: 
     
@@ -87,6 +96,7 @@ The class Microservice is used to create a listener/a microservice. In a file/ap
 * One app should have only one listener
 * Should use `__name__` for name and name need to be unique
 * If you run multiple listener, use only one unique port for each listener. for example:
+
 ```
 M1 = Microservice(__name__, port=5010) # in file app1
 M2 = Microservice(__name__, port=5020) # in file app2
@@ -300,6 +310,7 @@ z= None <class 'NoneType'>
 
 ### 6. Send and reply void, Nonetype, class attributes and use of token
 In the sender side, you can send data type as the code below:
+
 ```
 print(
 """##############################
@@ -337,6 +348,7 @@ print('z=', z, type(z))
 ```
 
 In the listener, you can reply/return data type as string, integer, float as below:
+
 ```
 # return None, class Object
 @M.typing('/None')
@@ -377,6 +389,7 @@ def TestClass3(a, key):
     return x, y, z 
 ```
 After that, first run listener then run sender. We have results (for full example see tests/example01):
+
 ```
 ##############################
 Test return NoneType, Class, use of Token
@@ -430,8 +443,9 @@ From my opinion only, Microservice connector has the following Pros and Cons to 
 
 * **Tuan Nguyen Minh** - *Financer and Developer* - email: ntuan221@gmail.com
 
-Thank for the framework and its authors:
+Thank for the frameworks and their authors:
 * flask - micro webframework
+* Sanic - Gotta go fast
 * requests
 
 Favourite idioms:
