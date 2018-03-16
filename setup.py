@@ -20,7 +20,7 @@ except (IOError, ImportError):
 
 setup(
     name='microservices_connector',
-    version='0.1.5',
+    version='0.1.6',
     description='Inter-Service communication framework, support for microservice architecture and distributed system via http',
     long_description=readme,
     author='Minh Tuan Nguyen',
@@ -47,5 +47,5 @@ setup(
     # ]},
     packages=find_packages(exclude=('test*', 'testpandoc*','image*')),
     include_package_data=False,
-    install_requires=['flask>=0.12','cython_npm','requests'],
+    install_requires=['flask==0.12.2', 'cython_npm', 'requests==2.18.4'],
 )

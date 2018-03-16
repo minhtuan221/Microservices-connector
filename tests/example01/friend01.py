@@ -30,7 +30,7 @@ def doget():
 
 @timeit
 def dopost():
-    r = requests.post('http://localhost:5000/hello',
+    r = requests.post('http://localhost:5010/hello',
                       json={"args": ["value", ], 'kwargs': {'onekey': 'value of key'}})
     r.status_code
     r.json()
@@ -39,7 +39,7 @@ def dopost():
 
 @timeit
 def doput():
-    r = requests.put('http://localhost:5000/hello', json={"key": "value"})
+    r = requests.put('http://localhost:5010/hello', json={"key": "value"})
     r.status_code
     r.json()
     print('put', r.json())
@@ -47,7 +47,7 @@ def doput():
 
 @timeit
 def dodelete():
-    r = requests.delete('http://localhost:5000/hello', json={"key": "value"})
+    r = requests.delete('http://localhost:5010/hello', json={"key": "value"})
     r.status_code
     r.json()
     print('delete', r.json())
@@ -60,7 +60,7 @@ def dodelete():
 
 # @timeit
 # def test():
-#     F = Friend('app1', 'http://localhost:5000')
+#     F = Friend('app1', 'http://localhost:5010')
 #     F.setRule('/hello')
 #     r = F.send('/hello', 'A variable value', onekey='A keyword variable value')
 #     return r
@@ -73,7 +73,7 @@ def testStr():
         """##############################
     Test return string
     """)
-    F = Friend('app1', 'localhost:5000')
+    F = Friend('app1', 'localhost:5010')
     print('Test: return a simple string')
     x = F.send('/str', 'A variable value', key='A keyword variable value')
     print('x=', x, type(x))
@@ -104,7 +104,7 @@ def testInt():
         """##############################
     Test return a int, float
     """)
-    F = Friend('app1', 'localhost:5000')
+    F = Friend('app1', 'localhost:5010')
     print('Test: return a simple Value')
     x = F.send('/int', 2018, key=312)
     print('x=', x, type(x))
@@ -140,7 +140,7 @@ def testListDict():
     """##############################
     Test return a list, dict
     """)
-    F = Friend('app1', 'localhost:5000')
+    F = Friend('app1', 'localhost:5010')
     print('Test: return a simple Value')
     x = F.send('/list', [12,34,45], key=['abc','zyz'])
     print('x=', x, type(x))
@@ -191,7 +191,7 @@ def testClassType():
         """##############################
     Test return NoneType, Class, use of Token
     """)
-    F = Friend('app1', 'localhost:5000')
+    F = Friend('app1', 'localhost:5010')
     print('Test: return a simple Value')
     x = F.send('/None', [12, 34, 45], key=['abc', 'zyz'])
     print('x=', x, type(x))

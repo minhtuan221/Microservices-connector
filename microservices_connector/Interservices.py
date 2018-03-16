@@ -1,4 +1,4 @@
-from flask import Flask, Response
+from flask import Flask
 from flask import request, jsonify
 import inspect
 import json
@@ -42,7 +42,7 @@ class Microservice(object):
     def init_app(self, name, **kwargs):
         self.app = Flask(name)
 
-    def remove(self, token: str):
+    def removeToken(self, token: str):
         return self.token.pop(token, None)
 
     def typing(self, rule: str, **options):
@@ -82,27 +82,33 @@ class Microservice(object):
                 if kwargs is not None:
                     for key in content['kwargs']:
                         kwargs[key] = content['kwargs'][key]
-            else:
-                raise ValueError('Request contain no json')
+            # else:
+            #     raise ValueError('Request contain no json')
             # print(request.headers)
             return self.microResponse(f(*args, **kwargs))
         return wrapper
 
-    def run(self, **kwargs):
-        self.app.run(**kwargs)
+    def run(self, port=None , host=None, debug=None):
+        if port is None:
+            port = self.port
+        if host is None:
+            host = self.host
+        if debug is None:
+            debug = self.debug
+        self.app.run(port=port, host=host, debug=debug)
 
     def microResponse(self, *args):
         final = {'res': []}
-        print(len(args), type(args))
+        # print(len(args), type(args))
         if len(args) == 0:
             return final
         else:
             args = list(args,)
-            print(args)
+            # print(args)
             for arg in args:
                 if isinstance(arg, tuple):
                     arg = list(arg)
-                    print(arg)
+                    # print(arg)
                     for i in arg:
                         final['res'].append({'obj':oneResponse(i)})
                 else:
@@ -295,16 +301,16 @@ class SanicApp(Microservice):
     
     def microResponse(self, *args):
         final = {'res': []}
-        print(len(args), type(args))
+        # print(len(args), type(args))
         if len(args) == 0:
             return final
         else:
             args = list(args,)
-            print(args)
+            # print(args)
             for arg in args:
                 if isinstance(arg, tuple):
                     arg = list(arg)
-                    print(arg)
+                    # print(arg)
                     for i in arg:
                         final['res'].append({'obj': oneResponse(i)})
                 else:

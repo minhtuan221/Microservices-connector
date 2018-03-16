@@ -4,7 +4,7 @@ module = require('../../microservices_connector/Interservices')
 Microservice = module.Microservice
 
 # app = Flask(__name__)
-M = Microservice(__name__)
+M = Microservice(__name__, port=5010)
 
 # run a normal function in python
 print('one cat here')
