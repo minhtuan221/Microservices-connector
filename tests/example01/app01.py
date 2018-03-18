@@ -102,4 +102,4 @@ def TestClass3(a, key):
 
 # Option 1: run Microservice within file it's created
 if __name__ == '__main__':
-    M.run(port=5000, host='0.0.0.0', debug=True)
+    Micro.run(port=5010, host='0.0.0.0', debug=True)

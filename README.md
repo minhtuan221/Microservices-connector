@@ -36,13 +36,13 @@ from microservices_connector.Interservices import Microservice
 
 M = Microservice(__name__)
 
-@M.typing('/helloworld')
-@M.reply
+@Micro.typing('/helloworld')
+@Micro.reply
 def helloworld(name):
     return 'Welcome %s' % (name)
 
 if __name__ == '__main__':
-    M.run()
+    Micro.run()
 ```
 
 * Step 2: Create 1 file name app2.py, write and save with the code below
@@ -74,12 +74,12 @@ In the tutorial, we assume you have this code in the top of your file.
 ```
 from microservices_connector.Interservices import Microservice
 
-M = Microservice(__name__)
+Micro = Microservice(__name__)
 
 # for Sanic framework if you want to use sanic instead of flask
 from microservices_connector.Interservices import SanicApp as Microservice
 
-Msanic = Microservice(__name__)
+Micro = Microservice(__name__)
 ``` 
 Now, look closer at `Microservice(__name__)`, it actually look like this: 
     
@@ -111,7 +111,7 @@ Option 1: Use if/main in the end of startup file (file that you start your proje
 ```
 # M is your Microservice Object
 if __name__ == '__main__':
-    M.run()
+    Micro.run()
 ```
 
 Option 2: Create a file name run.py and run your app from this file. For example, we create a run.py in the same folder of app1.py in the first example. It will be like this:
@@ -119,7 +119,7 @@ Option 2: Create a file name run.py and run your app from this file. For example
 from app1 import M
 
 if __name__ == '__main__':
-    M.run(port=5000, host='0.0.0.0', debug=True)
+    Micro.run(port=5000, host='0.0.0.0', debug=True)
 ```
 Option 2 is more appreciated. It avoid the app looping from them self, so get away of stunning your app. If you have 2 app in a server/computer, you should create 2 run file for it. Don't for get `Ctrl + C` to stop your app.
 
@@ -140,13 +140,13 @@ message = aFriend.send('/helloworld','Mr. Close friend') # then you can send him
 
 In other side, your friend or a microservice or a listener has the following process:
 ```
-@M.typing('/helloworld') # this is the rule/topic he knows. If he don't know, he cannot reply
-@M.reply # he is replying
+@Micro.typing('/helloworld') # this is the rule/topic he knows. If he don't know, he cannot reply
+@Micro.reply # he is replying
 def helloworld(name): # this is the process in side his head
     return 'Welcome %s' % (name) # the answer
 ```
 
-`@M.typing` - The rule/topic must exactly match with the topic was sent and should startwith "/". The `@M.reply` must come before def. Then, Microservice handles the remain. Next chapter is about returning data
+`@Micro.typing` - The rule/topic must exactly match with the topic was sent and should startwith "/". The `@Micro.reply` must come before def. Then, Microservice handles the remain. Next chapter is about returning data
 
 ### 4. Send and reply string, integer, float
 
@@ -194,31 +194,31 @@ In the listener, you can reply/return data type as string, integer, float as bel
 print('one cat here')
 
 # return string
-@M.typing('/str')
-@M.reply
+@Micro.typing('/str')
+@Micro.reply
 def string1(a,key):
     return a+'-'+key
 
 # return multiple string
-@M.typing('/str2')
-@M.reply
+@Micro.typing('/str2')
+@Micro.reply
 def string2(a, key):
     return a, key, a+'-'+key
 
 # return Integer and float
-@M.typing('/int')
-@M.reply
+@Micro.typing('/int')
+@Micro.reply
 def int1(a, key):
     return a+key
 
-@M.typing('/float')
-@M.reply
+@Micro.typing('/float')
+@Micro.reply
 def float2(a, key):
     return a+key
 
 
-@M.typing('/int3')
-@M.reply
+@Micro.typing('/int3')
+@Micro.reply
 def int3(a, key):
     return a+key, key*key, a*a
 ```
@@ -272,22 +272,22 @@ print('z=', z, type(z))
 In the listener, you can reply/return data type as string, integer, float as below:
 ```
 # test return list and dict
-@M.typing('/list')
-@M.reply
+@Micro.typing('/list')
+@Micro.reply
 def list1(a, key):
     a.extend(key)
     return a
 
 
-@M.typing('/dict')
-@M.reply
+@Micro.typing('/dict')
+@Micro.reply
 def dict1(a, key):
     key['dict'] = a
     return key
 
 
-@M.typing('/list3')
-@M.reply
+@Micro.typing('/list3')
+@Micro.reply
 def list3(a, key):
     key.append('other value')
     c = None
@@ -351,8 +351,8 @@ In the listener, you can reply/return data type as string, integer, float as bel
 
 ```
 # return None, class Object
-@M.typing('/None')
-@M.reply
+@Micro.typing('/None')
+@Micro.reply
 def TestNoneValue(a, key):
     key.append('Do something in the server')
 
@@ -367,21 +367,21 @@ class testservice(object):
         pass
 
 
-@M.typing('/class',token='123456')
-@M.reply
+@Micro.typing('/class',token='123456')
+@Micro.reply
 def TestClass(a, key):
     t = testservice(a)
     return t
 
 
-@M.typing('/class2', token='123456')
-@M.reply
+@Micro.typing('/class2', token='123456')
+@Micro.reply
 def TestClass2(a, key):
     t = testservice(key)
     return t, a, None
 
-@M.typing('/class3', token='123456')
-@M.reply
+@Micro.typing('/class3', token='123456')
+@Micro.reply
 def TestClass3(a, key):
     x = testservice(key)
     y = testservice(a)
