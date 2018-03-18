@@ -4,66 +4,66 @@ module = require('../../microservices_connector/Interservices')
 Microservice = module.Microservice
 
 # app = Flask(__name__)
-M = Microservice(__name__, port=5010)
+Micro = Microservice(__name__, port=5010)
 
 # run a normal function in python
 print('one cat here')
 
 # test return string
-@M.typing('/str')
-@M.reply
+@Micro.typing('/str')
+@Micro.reply
 def string1(a,key):
     return a+'-'+key
 
 # test return multiple string
-@M.typing('/str2')
-@M.reply
+@Micro.typing('/str2')
+@Micro.reply
 def string2(a, b, key):
     return a, key, b+'-'+key
 
 # test return Integer and float
-@M.typing('/int')
-@M.reply
+@Micro.typing('/int')
+@Micro.reply
 def int1(a, key):
     return a+key
 
 
-@M.typing('/float')
-@M.reply
+@Micro.typing('/float')
+@Micro.reply
 def float2(a, key):
     return a+key
 
 
-@M.typing('/int3')
-@M.reply
+@Micro.typing('/int3')
+@Micro.reply
 def int3(a, key, key2):
     return a+key2, key*key, a*a
 
 # test return list and dict
-@M.typing('/list')
-@M.reply
+@Micro.typing('/list')
+@Micro.reply
 def list1(a, key):
     a.extend(key)
     return a
 
 
-@M.typing('/dict')
-@M.reply
+@Micro.typing('/dict')
+@Micro.reply
 def dict1(a, key):
     key['dict'] = a
     return key
 
 
-@M.typing('/list3')
-@M.reply
+@Micro.typing('/list3')
+@Micro.reply
 def list3(a, key):
     key.append('other value')
     c = None
     return a, key, c
 
 # return None, class Object
-@M.typing('/None')
-@M.reply
+@Micro.typing('/None')
+@Micro.reply
 def TestNoneValue(a, key):
     key.append('Do something in the server')
 
@@ -78,22 +78,22 @@ class testservice(object):
         print('This is test class')
 
 
-@M.typing('/class',token='123456')
-@M.reply
+@Micro.typing('/class',token='123456')
+@Micro.reply
 def TestClass(a, key):
     t = testservice(a)
     return t
 
 
-@M.typing('/class2', token='123456')
-@M.reply
+@Micro.typing('/class2', token='123456')
+@Micro.reply
 def TestClass2(a, key):
     t = testservice(key)
     return t, a, None
 
 
-@M.typing('/class3', token='123456')
-@M.reply
+@Micro.typing('/class3', token='123456')
+@Micro.reply
 def TestClass3(a, key):
     x = testservice(key)
     y = testservice(a)

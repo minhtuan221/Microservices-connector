@@ -49,8 +49,8 @@ if __name__ == '__main__':
 ```
 from microservices_connector.Interservices import Friend
 
-F = Friend('app1', 'http://0.0.0.0:5000')
-message = F.send('/helloworld','Mr. Developer')
+aFriend= Friend('app1', 'http://0.0.0.0:5000')
+message = aFriend.send('/helloworld','Mr. Developer')
 print(message)
 ```
 * Step 3: Run app1.py and app2.py together.
@@ -129,14 +129,14 @@ Note: _We assume you already use one of the options above for your code_. This t
 
 Think like a human, if you want to communicate with some friend in facebook, you will open *messenger*, find your friend and send a message to them. It's a way of sending message to each other. Then, your friend will type a message and reply you. The process is similar here. See the code:
 ```
-F = Friend('Corgi', 'http://0.0.0.0:5000') # this is: you're finding friend in your head. 
+aFriend= Friend('Corgi', 'http://0.0.0.0:5000') # this is: you're finding friend in your head. 
 # You can call him with a cute name like 'Puppy','Teddy' or 'Corgi'. 
 # But you must always remember his real-name is 'http://0.0.0.0:5000' to know actually who he is
 
-message = F.send('/helloworld','Mr. Close friend') # then you can send him a message
+message = aFriend.send('/helloworld','Mr. Close friend') # then you can send him a message
 ```
 
-`/helloworld` is the rule/topic you say/ask to a friend or the route in http. It need to start with `/`. The rule must match with the rule of `Typing` to be replied. `Mr. Close friend` is what you are talking about, which can be string, integer, float, list, dict or class. For example: `F.send('/topic',variable1, variable2, keyword1='secret key')`
+`/helloworld` is the rule/topic you say/ask to a friend or the route in http. It need to start with `/`. The rule must match with the rule of `Typing` to be replied. `Mr. Close friend` is what you are talking about, which can be string, integer, float, list, dict or class. For example: `aFriend.send('/topic',variable1, variable2, keyword1='secret key')`
 
 In other side, your friend or a microservice or a listener has the following process:
 ```
@@ -156,13 +156,13 @@ print(
     """##############################
     Test return string
     """)
-F = Friend('app1', 'http://localhost:5000')
+aFriend= Friend('app1', 'http://localhost:5000')
 print('Test: return a simple string')
-x = F.send('/str', 'A variable value', key='A keyword variable value')
+x = aFriend.send('/str', 'A variable value', key='A keyword variable value')
 print('x=', x, type(x))
 print('==========================')
 print('Test: return multiple string')
-x, y, z = F.send('/str2', 'A variable value',
+x, y, z = aFriend.send('/str2', 'A variable value',
                 key='A keyword variable value')
 print('x=' ,x, type(x))
 print('y=', y, type(y))
@@ -172,17 +172,17 @@ print(
     """##############################
     Test return a int, float
     """)
-F = Friend('app1', 'http://localhost:5000')
+aFriend= Friend('app1', 'http://localhost:5000')
 print('Test: return a simple Value')
-x = F.send('/int', 2018, key=312)
+x = aFriend.send('/int', 2018, key=312)
 print('x=', x, type(x))
 print('==========================')
 print('Test: return a simple Value')
-x = F.send('/float', 2.018, key=3.12)
+x = aFriend.send('/float', 2.018, key=3.12)
 print('x=', x, type(x))
 print('==========================')
 print('Test: return multiple Value')
-x, y, z = F.send('/int3', 3.1427,
+x, y, z = aFriend.send('/int3', 3.1427,
                     key=1000000000)
 print('x=', x, type(x))
 print('y=', y, type(y))
@@ -253,17 +253,17 @@ print(
     """##############################
     Test return a list, dict
     """)
-F = Friend('app1', 'http://localhost:5000')
+aFriend= Friend('app1', 'http://localhost:5000')
 print('Test: return a simple Value')
-x = F.send('/list', [12,34,45], key=['abc','zyz'])
+x = aFriend.send('/list', [12,34,45], key=['abc','zyz'])
 print('x=', x, type(x))
 print('==========================')
 print('Test: return a simple Value')
-x = F.send('/dict', {'keyword':['anything']}, key={'int':20,'str':'adfafsa','float':0.2323})
+x = aFriend.send('/dict', {'keyword':['anything']}, key={'int':20,'str':'adfafsa','float':0.2323})
 print('x=', x, type(x))
 print('==========================')
 print('Test: return multiple Value')
-x, y, z = F.send('/list3', {'keyword': ['anything']},
+x, y, z = aFriend.send('/list3', {'keyword': ['anything']},
                     key=['abc', 'zyz'])
 print('x=', x, type(x))
 print('y=', y, type(y))
@@ -316,20 +316,20 @@ print(
 """##############################
 Test return NoneType, Class, use of Token
 """)
-F = Friend('app1', 'http://localhost:5000')
+aFriend= Friend('app1', 'http://localhost:5000')
 print('Test: return a simple Value')
-x = F.send('/None', [12, 34, 45], key=['abc', 'zyz'])
+x = aFriend.send('/None', [12, 34, 45], key=['abc', 'zyz'])
 print('x=', x, type(x))
 print('==========================')
 print('Test: return a simple Value with token')
-F.setRule('/class', token='123456')
-x = F.send('/class', {'keyword': ['anything']},
+aFriend.setRule('/class', token='123456')
+x = aFriend.send('/class', {'keyword': ['anything']},
             key={'int': 20, 'str': 'adfafsa', 'float': 0.2323})
 print('x=', x, type(x))
 print('==========================')
 print('Test: return multiple Value')
-F.setRule('/class2', token='123456')
-x,y,z = F.send('/class2', {'keyword': ['anything']},
+aFriend.setRule('/class2', token='123456')
+x,y,z = aFriend.send('/class2', {'keyword': ['anything']},
             key={'int': 20, 'str': 'adfafsa', 'float': 0.2323})
 print('x=', x, type(x))
 print('y=', y, type(y))
@@ -337,10 +337,10 @@ print('z=', z, type(z))
 
 # Test send class and list of class object
 print('\n Test: send class and list of class object')
-F.setRule('/class3', token='123456')
+aFriend.setRule('/class3', token='123456')
 t1 = testservice('value1')
 t2 = testservice('value2')
-x, y, z = F.send('/class3', [t1,t2],
+x, y, z = aFriend.send('/class3', [t1,t2],
                     key={'t1': t1, 't2': t2, 'list': [t1, t2]})
 print('x=', x, type(x))
 print('y=', y, type(y))

@@ -47,5 +47,5 @@ setup(
     # ]},
     packages=find_packages(exclude=('test*', 'testpandoc*','image*')),
     include_package_data=False,
-    install_requires=['flask==0.12.2', 'cython_npm', 'requests==2.18.4'],
+    install_requires=['flask==0.12.2', 'cython_npm', 'requests==2.18.4','sanic'],
 )

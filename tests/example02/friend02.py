@@ -61,9 +61,9 @@ def dodelete():
 
 # @timeit
 # def test():
-#     F = Friend('app1', 'http://localhost:5000')
-#     F.setRule('/hello')
-#     r = F.send('/hello', 'A variable value', onekey='A keyword variable value')
+#     aFriend= Friend('app1', 'http://localhost:5000')
+#     aFriend.setRule('/hello')
+#     r = aFriend.send('/hello', 'A variable value', onekey='A keyword variable value')
 #     return r
 
 # python run.py
@@ -74,13 +74,13 @@ def testStr():
         """##############################
     Test return string
     """)
-    F = Friend('app1', 'localhost:5000')
+    aFriend= Friend('app1', 'localhost:5000')
     print('Test: return a simple string')
-    x = F.send('/str', 'A variable value', key='A keyword variable value')
+    x = aFriend.send('/str', 'A variable value', key='A keyword variable value')
     print('x=', x, type(x))
     print('==========================')
     print('Test: return multiple string')
-    x, y, z = F.send('/str2', 'A variable value','second Variable',
+    x, y, z = aFriend.send('/str2', 'A variable value','second Variable',
                   key='A keyword variable value')
     print('x=' ,x, type(x))
     print('y=', y, type(y))
@@ -105,17 +105,17 @@ def testInt():
         """##############################
     Test return a int, float
     """)
-    F = Friend('app1', 'localhost:5000')
+    aFriend= Friend('app1', 'localhost:5000')
     print('Test: return a simple Value')
-    x = F.send('/int', 2018, key=312)
+    x = aFriend.send('/int', 2018, key=312)
     print('x=', x, type(x))
     print('==========================')
     print('Test: return a simple Value')
-    x = F.send('/float', 2.018, key=3.12)
+    x = aFriend.send('/float', 2.018, key=3.12)
     print('x=', x, type(x))
     print('==========================')
     print('Test: return multiple Value')
-    x, y, z = F.send('/int3', 3.1427,
+    x, y, z = aFriend.send('/int3', 3.1427,
                      key=1000000000, key2=2.71230)
     print('x=', x, type(x))
     print('y=', y, type(y))
@@ -141,17 +141,17 @@ def testListDict():
     """##############################
     Test return a list, dict
     """)
-    F = Friend('app1', 'localhost:5000')
+    aFriend= Friend('app1', 'localhost:5000')
     print('Test: return a simple Value')
-    x = F.send('/list', [12,34,45], key=['abc','zyz'])
+    x = aFriend.send('/list', [12,34,45], key=['abc','zyz'])
     print('x=', x, type(x))
     print('==========================')
     print('Test: return a simple Value')
-    x = F.send('/dict', {'keyword':['anything']}, key={'int':20,'str':'adfafsa','float':0.2323})
+    x = aFriend.send('/dict', {'keyword':['anything']}, key={'int':20,'str':'adfafsa','float':0.2323})
     print('x=', x, type(x))
     print('==========================')
     print('Test: return multiple Value')
-    x, y, z = F.send('/list3', {'keyword': ['anything']},
+    x, y, z = aFriend.send('/list3', {'keyword': ['anything']},
                      key=['abc', 'zyz'])
     print('x=', x, type(x))
     print('y=', y, type(y))
@@ -192,20 +192,20 @@ def testClassType():
         """##############################
     Test return NoneType, Class, use of Token
     """)
-    F = Friend('app1', 'localhost:5000')
+    aFriend= Friend('app1', 'localhost:5000')
     print('Test: return a simple Value')
-    x = F.send('/None', [12, 34, 45], key=['abc', 'zyz'])
+    x = aFriend.send('/None', [12, 34, 45], key=['abc', 'zyz'])
     print('x=', x, type(x))
     print('==========================')
     print('Test: return a simple Value with token')
-    F.setRule('/class', token='123456')
-    x = F.send('/class', {'keyword': ['anything']},
+    aFriend.setRule('/class', token='123456')
+    x = aFriend.send('/class', {'keyword': ['anything']},
                key={'int': 20, 'str': 'adfafsa', 'float': 0.2323})
     print('x=', x, type(x))
     print('==========================')
     print('Test: return multiple Value')
-    F.setRule('/class2', token='123456')
-    x,y,z = F.send('/class2', {'keyword': ['anything']},
+    aFriend.setRule('/class2', token='123456')
+    x,y,z = aFriend.send('/class2', {'keyword': ['anything']},
                key={'int': 20, 'str': 'adfafsa', 'float': 0.2323})
     print('x=', x, type(x))
     print('y=', y, type(y))
@@ -213,10 +213,10 @@ def testClassType():
 
     # Test send class and list of class object
     print('Test: send class and list of class object')
-    F.setRule('/class3', token='123456')
+    aFriend.setRule('/class3', token='123456')
     t1 = testservice('value1')
     t2 = testservice('value2')
-    x, y, z = F.send('/class3', [t1,t2],
+    x, y, z = aFriend.send('/class3', [t1,t2],
                      key={'t1': t1, 't2': t2, 'list': [t1, t2]})
     print('x=', x, type(x))
     print('y=', y, type(y))
