@@ -34,7 +34,7 @@ Start project by a minimum example:
 ```
 from microservices_connector.Interservices import Microservice
 
-M = Microservice(__name__)
+Micro = Microservice(__name__)
 
 @Micro.typing('/helloworld')
 @Micro.reply
@@ -109,14 +109,14 @@ A sender is a python def, so you can put it anywhere in your app. Listener is a 
 
 Option 1: Use if/main in the end of startup file (file that you start your project by `python <filename>`). Add the following code the end:
 ```
-# M is your Microservice Object
+# Micro is your Microservice Object
 if __name__ == '__main__':
     Micro.run()
 ```
 
 Option 2: Create a file name run.py and run your app from this file. For example, we create a run.py in the same folder of app1.py in the first example. It will be like this:
 ```
-from app1 import M
+from app1 import Micro
 
 if __name__ == '__main__':
     Micro.run(port=5000, host='0.0.0.0', debug=True)
