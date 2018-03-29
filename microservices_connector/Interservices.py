@@ -293,8 +293,8 @@ class SanicApp(Microservice):
                 if kwargs is not None:
                     for key in content['kwargs']:
                         kwargs[key] = content['kwargs'][key]
-            else:
-                raise ValueError('Request contain no json')
+            # else:
+            #     raise ValueError('Request contain no json')
             # print(request.headers)
             return self.microResponse(f(*args, **kwargs))
         return wrapper
