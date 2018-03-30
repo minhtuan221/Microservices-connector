@@ -1,6 +1,6 @@
 from cython_npm.cythoncompile import require
 from functools import wraps
-from microservices_connector.Interservices import SanicApp as Microservice
+from Interservices import SanicApp as Microservice
 
 # module = require('../../microservices_connector/Interservices')
 # Microservice = module.SanicApp
