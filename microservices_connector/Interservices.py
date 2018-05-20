@@ -98,7 +98,7 @@ class Microservice(object):
         self.app.run(port=port, host=host, debug=debug)
 
     def microResponse(self, *args):
-        final = {'res': []}
+        final = []
         # print(len(args), type(args))
         if len(args) == 0:
             return final
@@ -110,9 +110,9 @@ class Microservice(object):
                     arg = list(arg)
                     # print(arg)
                     for i in arg:
-                        final['res'].append(oneResponse(i))
+                        final.append(oneResponse(i))
                 else:
-                    final['res'].append(oneResponse(arg))
+                    final.append(oneResponse(arg))
         return jsonify(final)
 
 
@@ -205,9 +205,9 @@ class Friend(object):
                 try:
                     # res = json.loads(res['res'])
                     self.lastMessage = res
-                    if 'res' in res and isinstance(res['res'], list):
+                    if isinstance(res, list):
                         final = []
-                        for arg in res['res']:
+                        for arg in res:
                             final.append(arg)
                         if len(final)<=1:
                             return final[0]
@@ -308,7 +308,7 @@ class SanicApp(Microservice):
         return wrapper
     
     def microResponse(self, *args):
-        final = {'res': []}
+        final = []
         # print(len(args), type(args))
         if len(args) == 0:
             return final
@@ -320,7 +320,7 @@ class SanicApp(Microservice):
                     arg = list(arg)
                     # print(arg)
                     for i in arg:
-                        final['res'].append(oneResponse(i))
+                        final.append(oneResponse(i))
                 else:
-                    final['res'].append(oneResponse(arg))
+                    final.append(oneResponse(arg))
         return response.json(final)

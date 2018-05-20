@@ -2,10 +2,10 @@ import requests
 import time
 import json
 from cython_npm.cythoncompile import require
-from Interservices import Friend
+# from Interservices import Friend
 # from ../
-# Interservices = require('../../microservices_connector/Interservices')
-# Friend = Interservices.Friend
+Interservices = require('../../microservices_connector/Interservices')
+Friend = Interservices.Friend
 # test sanic app
 
 def timeit(method):
