@@ -222,6 +222,8 @@ def testClassType():
     print('x=', x, type(x))
     print('y=', y, type(y))
     print('z=', z, type(z))
+    x = aFriend.json('/json', a=12,b='This is a text')
+    print(x)
 
 
 

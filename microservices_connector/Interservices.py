@@ -5,6 +5,7 @@ import json
 from functools import wraps
 import requests
 import time
+import traceback
 
 
 def timeit(method):
@@ -22,16 +23,17 @@ def timeit(method):
 
 
 class Microservice(object):
-    """Microservice(name, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None)
     
-    Arguments:
-        name {str} -- Require a name for your app, recommend put __name__ for it
-        port {int} -- Choose from 3000 to 9000, default to 5000
-        host {str} -- Host ip, Default 0.0.0.0 for localhost
-        debug {boolean} -- True for development, False/None for production
-        token {dict} -- A dict contain all rule and its token. It can be set later
-    """
     def __init__(self, name, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None, **kwargs):
+        """Microservice(name, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None)
+
+        Arguments:
+            name {str} -- Require a name for your app, recommend put __name__ for it
+            port {int} -- Choose from 3000 to 9000, default to 5000
+            host {str} -- Host ip, Default 0.0.0.0 for localhost
+            debug {boolean} -- True for development, False/None for production
+            token {dict} -- A dict contain all rule and its token. It can be set later
+        """
         self.port = port
         self.host = host
         self.debug = debug
@@ -48,6 +50,7 @@ class Microservice(object):
     def typing(self, rule: str, **options):
         if not rule.startswith('/'):
             rule = '/' + rule
+
         def decorator(f):
             endpoint = options.pop('endpoint', None)
             methods = options.pop('methods', None)
@@ -55,7 +58,7 @@ class Microservice(object):
             try:
                 self.token[rule] = str(token)
             except:
-                raise ValueError('Token must be a string')
+                traceback.print_exc()
             # if the methods are not given and the view_func object knows its
             # methods we can use that instead.  If neither exists, we go with
             # a tuple of only ``POST`` as default.
@@ -88,7 +91,16 @@ class Microservice(object):
             return self.microResponse(f(*args, **kwargs))
         return wrapper
 
-    def run(self, port=None , host=None, debug=None):
+    def json(self, f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            content = request.get_json(silent=True)
+            for key in content:
+                kwargs[key] = content[key]
+            return self.microResponse(f(*args, **kwargs))
+        return wrapper
+
+    def run(self, port=None, host=None, debug=None):
         if port is None:
             port = self.port
         if host is None:
@@ -132,6 +144,7 @@ def oneResponse(res):
         try:
             return propsOBJ(res)
         except Exception:
+            traceback.print_exc()
             return 'Error: Object type is not supported!'
     else:
         return 'Error: Object type is not supported!'
@@ -156,11 +169,11 @@ class Friend(object):
 
     def send(self, rule: str, *args, **kwargs):
         listargs = []
-        if len(args)>0:
+        if len(args) > 0:
             for i in list(args):
                 listargs.append(oneResponse(i))
         dictkwargs = dict()
-        if len(kwargs)>0:
+        if len(kwargs) > 0:
             kwargs = dict(kwargs)
             for i in kwargs:
                 dictkwargs[i] = oneResponse(kwargs[i])
@@ -209,12 +222,55 @@ class Friend(object):
                         final = []
                         for arg in res:
                             final.append(arg)
-                        if len(final)<=1:
+                        if len(final) <= 1:
                             return final[0]
                         return final
                     else:
                         final = res
                 except Exception as identifier:
+                    traceback.print_exc()
+                    final = r.text
+                    self.lastMessage = res
+                return final
+            self.lastMessage = r.text
+            return r.text
+        self.lastMessage = None
+        return None
+
+    def json(self, rule: str, method='POST', **kwargs):
+        jsonsend = {}
+        for key in kwargs:
+            jsonsend[key] = kwargs[key]
+        if method == 'GET':
+            r = requests.get(self.address+rule, json=jsonsend)
+        elif method == 'PUT':
+            r = requests.put(self.address+rule, json=jsonsend)
+        elif method == 'DELETE':
+            r = requests.delete(self.address+rule, json=jsonsend)
+        else:
+            r = requests.post(self.address+rule, json=jsonsend)
+        
+        self.lastreply = r
+        # print(r.text)
+        if r.status_code == 200:
+            # print(r.headers['Content-Type'] == 'application/json')
+            if r.headers['Content-Type'] == 'application/json':
+                # print(r.text)
+                res = r.json()
+                try:
+                    # res = json.loads(res['res'])
+                    self.lastMessage = res
+                    if isinstance(res, list):
+                        final = []
+                        for arg in res:
+                            final.append(arg)
+                        if len(final) <= 1:
+                            return final[0]
+                        return final
+                    else:
+                        final = res
+                except Exception as identifier:
+                    traceback.print_exc()
                     final = r.text
                     self.lastMessage = res
                 return final
@@ -239,6 +295,15 @@ from sanic import response
 
 class SanicApp(Microservice):
     def __init__(self, name=None, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None, **kwargs):
+        """SanicApp(name, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None)
+
+        Arguments:
+            name {str} -- Require a name for your app, recommend put __name__ for it
+            port {int} -- Choose from 3000 to 9000, default to 5000
+            host {str} -- Host ip, Default 0.0.0.0 for localhost
+            debug {boolean} -- True for development, False/None for production
+            token {dict} -- A dict contain all rule and its token. It can be set later
+        """
         super().__init__(name, port, host, debug, token, secretKey, **kwargs)
 
     def init_app(self, name, **kwargs):
@@ -268,18 +333,18 @@ class SanicApp(Microservice):
 
         if strict_slashes is None:
             strict_slashes = self.app.strict_slashes
-        
+
         try:
             self.token[uri] = str(token)
         except:
-            raise ValueError('Token must be a string')
+            traceback.print_exc()
 
         def response(handler):
             if stream:
                 handler.is_stream = stream
             self.app.router.add(uri=uri, methods=methods, handler=handler,
-                            host=host, strict_slashes=strict_slashes,
-                            version=version, name=name)
+                                host=host, strict_slashes=strict_slashes,
+                                version=version, name=name)
             return handler
 
         return response
@@ -306,7 +371,16 @@ class SanicApp(Microservice):
             # print(request.headers)
             return self.microResponse(f(*args, **kwargs))
         return wrapper
-    
+
+    def json(self, f):
+        @wraps(f)
+        def wrapper(sanicRequest, *args, **kwargs):
+            content = sanicRequest.json
+            for key in content:
+                kwargs[key] = content[key]
+            return self.microResponse(f(*args, **kwargs))
+        return wrapper
+
     def microResponse(self, *args):
         final = []
         # print(len(args), type(args))
