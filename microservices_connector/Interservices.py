@@ -6,6 +6,7 @@ from functools import wraps
 import requests
 import time
 import traceback
+import spawn
 
 
 def timeit(method):
@@ -15,7 +16,7 @@ def timeit(method):
         result = method(*args, **kw)
         te = time.time()
 
-        print('%r  %2.2f ms' %
+        print('%r  %2.4f ms' %
               (method.__name__, (te - ts) * 1000))
         return result
 
@@ -283,6 +284,7 @@ class Friend(object):
 def propsOBJ(obj):
     pr = {}
     for name in dir(obj):
+        # print(dir(obj))
         value = getattr(obj, name)
         if not name.startswith('__') and not inspect.ismethod(value):
             pr[name] = value
@@ -379,6 +381,15 @@ class SanicApp(Microservice):
             for key in content:
                 kwargs[key] = content[key]
             return self.microResponse(f(*args, **kwargs))
+        return wrapper
+
+    def async_json(self, f):
+        @wraps(f)
+        async def wrapper(sanicRequest, *args, **kwargs):
+            content = sanicRequest.json
+            for key in content:
+                kwargs[key] = content[key]
+            return self.microResponse(await f(*args, **kwargs))
         return wrapper
 
     def microResponse(self, *args):

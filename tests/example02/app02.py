@@ -3,7 +3,8 @@ from functools import wraps
 # from Interservices import SanicApp as Microservice
 
 module = require('../../microservices_connector/Interservices')
-Microservice = module.Microservice
+Microservice = module.SanicApp
+timeit = module.timeit
 
 Micro = Microservice(__name__)
 
@@ -107,6 +108,7 @@ def TestClass2(a, key):
 
 @Micro.typing('/class3', token='123456')
 @Micro.reply
+@timeit
 def TestClass3(a, key):
     x = testservice(key)
     y = testservice(a)
@@ -116,9 +118,15 @@ def TestClass3(a, key):
 
 @Micro.typing('/json')
 @Micro.json
-def TestReceiveJson(a=1, b='string'):
-    return {'1':a,'2':b}
+@timeit
+def TestReceiveJson(a=1, b='string',c=None):
+    return {'1':a,'2':b,'3':c}
 
+
+@Micro.typing('/json1')
+@Micro.async_json
+async def TestReceiveJson2(a=None):
+    return a
 
 
 # Option 1: run Microservice within file it's created
