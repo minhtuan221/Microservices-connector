@@ -13,16 +13,18 @@ from setuptools import setup, find_packages
 readme = ''
 try:
    import pypandoc
-   readme = pypandoc.convert('README.md', 'rst')
+   readme = pypandoc.convert('README.md', 'rst', format='md')
+   with open('README.rst', 'w') as out:
+        out.write(readme)
 except (IOError, ImportError):
    readme = ''
 
 
 setup(
     name='microservices_connector',
-    version='0.2.3',
+    version='0.2.4',
     description='Inter-Service communication framework, support for microservice architecture and distributed system via http',
-    long_description=readme,
+    long_description='README.rst',
     author='Minh Tuan Nguyen',
     author_email='ntuan221@gmail.com',
     license='BSD',

@@ -27,7 +27,7 @@ class SocketServer(threading.Thread):
     async def connect(self, websocket, path):
         if path in self.url:
             handler = self.url[path]
-            message = await websocket.recv()
+            message = '?'
             while message!='exit':
                 message = await websocket.recv()
                 reply = handler(message)
@@ -36,22 +36,10 @@ class SocketServer(threading.Thread):
         else:
             await websocket.send('Websocket close: path does not exist')
 
-    def run(self):
-        print("Starting socket " + self.name)
-        loop = asyncio.new_event_loop()
+    def run(self, host='localhost', port=8765):
+        print("Starting socket in %s:%s" % (host,port))
+        loop = uvloop.new_event_loop()
         asyncio.set_event_loop(loop)
-        start_server = websockets.serve(self.connect, 'localhost', 8765)
+        start_server = websockets.serve(self.connect, host, port)
         loop.run_until_complete(start_server)
         loop.run_forever()
-
-sk = SocketServer(__name__)
-@sk.router('/hello')
-def test(message):
-    print(message)
-    return 'ok:'+message
-
-def main():
-    sk.run()
-
-if __name__ == '__main__':
-    main()
