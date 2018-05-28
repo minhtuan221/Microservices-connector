@@ -57,7 +57,7 @@ def dodelete():
 
 # python run.py
 # test return a string
-@timeit
+# @timeit
 def testStr():
     print(
         """##############################
@@ -65,7 +65,7 @@ def testStr():
     """)
     aFriend= Friend('app1', 'localhost:5000')
     print('Test: return a simple string')
-    x = aFriend.send('/str', 'A variable value', key='A keyword variable value')
+    x = aFriend.send('/str', key='A keyword variable value')
     print('x=', x, type(x))
     print('==========================')
     print('Test: return multiple string')
@@ -88,7 +88,7 @@ z= A variable value-A keyword variable value <class 'str'>
 """
 
 
-@timeit
+# @timeit
 def testInt():
     print(
         """##############################
@@ -124,7 +124,7 @@ z= 9.87656329 <class 'float'>
 """
 
 
-@timeit
+# @timeit
 def testListDict():
     print(
     """##############################
@@ -175,7 +175,7 @@ class testservice(object):
         print('This is test class')
 
 
-@timeit
+# @timeit
 def testClassType():
     print(
         """##############################

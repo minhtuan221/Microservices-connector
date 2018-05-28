@@ -20,7 +20,7 @@ except (IOError, ImportError):
 
 setup(
     name='microservices_connector',
-    version='0.2.2',
+    version='0.2.3',
     description='Inter-Service communication framework, support for microservice architecture and distributed system via http',
     long_description=readme,
     author='Minh Tuan Nguyen',
@@ -41,11 +41,11 @@ setup(
         'Topic :: Software Development :: Libraries :: Application Frameworks',
         'Topic :: Software Development :: Libraries :: Python Modules',
         ],
-    keywords=['microservice', 'http', 'flask'],
+    keywords=['microservice', 'http', 'flask', 'sanic', 'websockets'],
     # entry_points={'console_scripts': [
     #     'microservices_connector = microservices_connector:main',
     # ]},
     packages=find_packages(exclude=('test*', 'testpandoc*','image*','runtest*')),
     include_package_data=False,
-    install_requires=['flask', 'requests','sanic'],
+    install_requires=['flask', 'requests', 'sanic', 'websockets'],
 )

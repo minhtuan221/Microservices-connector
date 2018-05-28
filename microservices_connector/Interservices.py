@@ -6,7 +6,11 @@ from functools import wraps
 import requests
 import time
 import traceback
-import spawn
+import asyncio
+import os
+import aiohttp.web
+import aiohttp_debugtoolbar
+from aiohttp_debugtoolbar import toolbar_middleware_factory
 
 
 def timeit(method):
@@ -68,6 +72,8 @@ class Microservice(object):
             self.app.add_url_rule(rule, endpoint, f, **options)
             return f
         return decorator
+
+    route = typing
 
     def reply(self, f):
         @wraps(f)
@@ -193,18 +199,7 @@ class Friend(object):
             ruleMethods = {}
         if rule in ruleMethods:
             method = ruleMethods[rule]
-            if method == 'GET':
-                r = requests.get(self.address+rule,
-                                 json=jsonsend)
-            elif method == 'PUT':
-                r = requests.put(self.address+rule,
-                                 json=jsonsend)
-            elif method == 'DELETE':
-                r = requests.delete(self.address+rule,
-                                    json=jsonsend)
-            else:
-                r = requests.post(self.address+rule,
-                                  json=jsonsend)
+            r = self.http_request(rule, method, jsonsend)
         else:
             r = requests.post(self.address+rule,
                               json=jsonsend)
@@ -228,7 +223,7 @@ class Friend(object):
                         return final
                     else:
                         final = res
-                except Exception as identifier:
+                except Exception:
                     traceback.print_exc()
                     final = r.text
                     self.lastMessage = res
@@ -238,19 +233,35 @@ class Friend(object):
         self.lastMessage = None
         return None
 
+    def http_request(self, rule, method, jsonsend):
+        if method == 'GET':
+            r = requests.get(self.address+rule,
+                                json=jsonsend)
+        elif method == 'PUT':
+            r = requests.put(self.address+rule,
+                                json=jsonsend)
+        elif method == 'DELETE':
+            r = requests.delete(self.address+rule,
+                                json=jsonsend)
+        elif method == 'PATCH':
+            r = requests.patch(self.address+rule,
+                                json=jsonsend)
+        elif method == 'HEAD':
+            r = requests.head(self.address+rule,
+                                json=jsonsend)
+        elif method == 'OPTIONS':
+            r = requests.options(self.address+rule,
+                                json=jsonsend)
+        else:
+            r = requests.post(self.address+rule,
+                                  json=jsonsend)
+        return r
+
     def json(self, rule: str, method='POST', **kwargs):
         jsonsend = {}
         for key in kwargs:
             jsonsend[key] = kwargs[key]
-        if method == 'GET':
-            r = requests.get(self.address+rule, json=jsonsend)
-        elif method == 'PUT':
-            r = requests.put(self.address+rule, json=jsonsend)
-        elif method == 'DELETE':
-            r = requests.delete(self.address+rule, json=jsonsend)
-        else:
-            r = requests.post(self.address+rule, json=jsonsend)
-        
+        r = self.http_request(rule, method, jsonsend)
         self.lastreply = r
         # print(r.text)
         if r.status_code == 200:
@@ -270,7 +281,7 @@ class Friend(object):
                         return final
                     else:
                         final = res
-                except Exception as identifier:
+                except Exception:
                     traceback.print_exc()
                     final = r.text
                     self.lastMessage = res
@@ -351,6 +362,8 @@ class SanicApp(Microservice):
 
         return response
 
+    route = typing
+
     def reply(self, f):
         @wraps(f)
         def wrapper(sanicRequest, *args, **kwargs):
@@ -409,3 +422,63 @@ class SanicApp(Microservice):
                 else:
                     final.append(oneResponse(arg))
         return response.json(final)
+
+
+class AioSocket(object):
+    def __init__(self, name=None, port: int=5000, host: str='0.0.0.0', debug=None, **kwargs):
+        self.port = port
+        self.host = host
+        self.debug = debug
+        self.init_app(name, **kwargs)
+
+    def init_app(self, name, **kwargs):
+        loop = asyncio.get_event_loop()
+        self.app = aiohttp.web.Application(loop=loop)
+        aiohttp_debugtoolbar.setup(self.app)
+
+    def typing(self, rule: str, methods='POST', **options):
+        if not rule.startswith('/'):
+            rule = '/' + rule
+
+        def decorator(f):
+            token = options.pop('token', None)
+            # if the methods are not given and the view_func object knows its
+            # methods we can use that instead.  If neither exists, we go with
+            # a tuple of only ``POST`` as default.
+            for method in methods:
+                self.app.router.add_route(method, rule, f, **options)
+            return f
+        return decorator
+    route = typing
+
+    def async_json(self, f):
+        @wraps(f)
+        async def wrapper(aio_request, *args, **kwargs):
+            print(await aio_request.text(), type(await aio_request.text()))
+            # print(aio_request.json)
+            content = json.loads(await aio_request.text())
+            for key in content:
+                kwargs[key] = content[key]
+            return self.microResponse(await f(*args, **kwargs))
+        return wrapper
+
+    def microResponse(self, *args):
+        final = []
+        # print(len(args), type(args))
+        if len(args) == 0:
+            return final
+        else:
+            args = list(args,)
+            # print(args)
+            for arg in args:
+                if isinstance(arg, tuple):
+                    arg = list(arg)
+                    # print(arg)
+                    for i in arg:
+                        final.append(oneResponse(i))
+                else:
+                    final.append(oneResponse(arg))
+        return aiohttp.web.json_response(final)
+
+    def run(self, host, port, **kwargs):
+        aiohttp.web.run_app(self.app, host=host, port=port, **kwargs)

@@ -3,7 +3,7 @@ from functools import wraps
 # from Interservices import SanicApp as Microservice
 
 module = require('../../microservices_connector/Interservices')
-Microservice = module.SanicApp
+Microservice = module.AioSocket
 timeit = module.timeit
 
 Micro = Microservice(__name__)
@@ -15,58 +15,58 @@ print('one cat here')
 
 
 @Micro.route('/str')
-@Micro.reply
-def string1(a, key):
-    return a+'-'+key
+@Micro.async_json
+async def string1(key):
+    return '-'+key
 
 # test return multiple string
 
 
 @Micro.route('/str2')
-@Micro.reply
-def string2(a, b, key):
+@Micro.async_json
+async def string2(a, b, key):
     return a, key, b+'-'+key
 
 # test return Integer and float
 
 
 @Micro.typing('/int')
-@Micro.reply
-def int1(a, key):
+@Micro.async_json
+async def int1(a, key):
     return a+key
 
 
 @Micro.typing('/float')
-@Micro.reply
-def float2(a, key):
+@Micro.async_json
+async def float2(a, key):
     return a+key
 
 
 @Micro.typing('/int3')
-@Micro.reply
-def int3(a, key, key2):
+@Micro.async_json
+async def int3(a, key, key2):
     return a+key2, key*key, a*a
 
 # test return list and dict
 
 
 @Micro.typing('/list')
-@Micro.reply
-def list1(a, key):
+@Micro.async_json
+async def list1(a, key):
     a.extend(key)
     return a
 
 
 @Micro.typing('/dict')
-@Micro.reply
-def dict1(a, key):
+@Micro.async_json
+async def dict1(a, key):
     key['dict'] = a
     return key
 
 
 @Micro.typing('/list3')
-@Micro.reply
-def list3(a, key):
+@Micro.async_json
+async def list3(a, key):
     key.append('other value')
     c = None
     return a, key, c
@@ -75,8 +75,8 @@ def list3(a, key):
 
 
 @Micro.typing('/None')
-@Micro.reply
-def TestNoneValue(a, key):
+@Micro.async_json
+async def TestNoneValue(a, key):
     key.append('Do something in the server')
 
 
@@ -93,23 +93,23 @@ class testservice(object):
 
 
 @Micro.typing('/class', token='123456')
-@Micro.reply
-def TestClass(a, key):
+@Micro.async_json
+async def TestClass(a, key):
     t = testservice(a)
     return t
 
 
 @Micro.typing('/class2', token='123456')
-@Micro.reply
-def TestClass2(a, key):
+@Micro.async_json
+async def TestClass2(a, key):
     t = testservice(key)
     return t, a, None
 
 
 @Micro.typing('/class3', token='123456')
-@Micro.reply
+@Micro.async_json
 @timeit
-def TestClass3(a, key):
+async def TestClass3(a, key):
     x = testservice(key)
     y = testservice(a)
     z = [y, x]
@@ -117,9 +117,9 @@ def TestClass3(a, key):
 
 
 @Micro.typing('/json')
-@Micro.json
+@Micro.async_json
 @timeit
-def TestReceiveJson(a=1, b='string',c=None):
+async def TestReceiveJson(a=1, b='string', c=None):
     return {'1':a,'2':b,'3':c}
 
 
@@ -131,4 +131,4 @@ async def TestReceiveJson2(a=None):
 
 # Option 1: run Microservice within file it's created
 if __name__ == '__main__':
-    Micro.run(port=5000, host='0.0.0.0', debug=True)
+    Micro.run(port=5000, host='0.0.0.0')

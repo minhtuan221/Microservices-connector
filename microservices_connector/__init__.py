@@ -1,6 +1,6 @@
-import Interservices
+from . import Interservices, spawn, minisocket
 
-__all__ = ['Interservices','spawn','socket']
+__all__ = ['Interservices','spawn','minisocket']
 __author__ = 'Minh Tuan Nguyen'
 __version__ = '0.1.0'
 __copyright__ = "Copyright 2018, Minh Tuan Nguyen"
