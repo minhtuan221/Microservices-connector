@@ -9,6 +9,44 @@ from concurrent.futures import Future, ThreadPoolExecutor
 import uvloop
 # loop = uvloop.new_event_loop()
 # asyncio.set_event_loop(loop)
+import queue
+import time
+
+class AsyncThread(threading.Thread):
+    """Threaded website reader"""
+
+    def __init__(self, queue, out_queue):
+        threading.Thread.__init__(self)
+        self.queue = queue
+        self.out_queue = out_queue
+
+    def run(self):
+        while True:
+            # Grabs host from queue
+            host = self.queue.get()
+
+            # Grabs urls of hosts and then grabs chunk of webpage
+            time.sleep(2)
+            print("Reading: %s" % host)
+
+            # Signals to queue job is done
+            self.queue.task_done()
+
+
+# queue = queue.Queue()
+# for i in range(5):
+#     t = ThreadNumber(queue, 'out_queue')
+#     t.daemon = True
+#     threads.append(t)
+#     t.start()
+# hosts = [i for i in range(20)]
+# # Populate queue with data
+# for host in hosts:
+#     queue.put(host)
+# Wait on the queue until everything has been processed
+# queue.join()
+# for t in threads:
+#     t.join()
 
 class AsyncToSync:
     """

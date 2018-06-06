@@ -44,14 +44,14 @@ class SocketServer(threading.Thread):
         loop.run_until_complete(start_server)
         loop.run_forever()
 
-sk = SocketServer(__name__)
-@sk.router('/hello')
-def test(message):
-    print(message)
-    return 'ok:'+message
+# sk = SocketServer(__name__)
+# @sk.router('/hello')
+# def test(message):
+#     print(message)
+#     return 'ok:'+message
 
-def main():
-    sk.run()
+# def main():
+#     sk.run()
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

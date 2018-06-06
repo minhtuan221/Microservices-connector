@@ -1,7 +1,7 @@
 import asyncio
 import websockets
 import spawn
-import threading
+import threading, time
 from microservices_connector.Interservices import Microservice
 Micro = Microservice(__name__)
 
@@ -23,9 +23,9 @@ def socket_run():
     loop.run_forever()
 
 @Micro.typing('/', methods=['GET'])
-@Micro.reply
 def string1():
-    print('start other app')
+    time.sleep(2)
+    return 'Sleep 2s before response'
 
 def flask_app():
     Micro.run(port=5000, host='0.0.0.0')
