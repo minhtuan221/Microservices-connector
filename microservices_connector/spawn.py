@@ -12,49 +12,73 @@ import uvloop
 import queue
 import time
 from collections import deque
-from queue import Queue
+import queue
 import threading
 import random
+import multiprocessing
 
 
 class AsyncThread(threading.Thread):
     """Threaded Async reader, read data from queue"""
 
-    def __init__(self, queue, out_queue=None):
+    def __init__(self, in_queue, out_queue=None):
         """Threaded Async reader, read data from queue
-        
+
         Arguments:
             queue {[type]} -- queue or deque
-        
+
         Keyword Arguments:
             out_queue {[type]} -- queue receive result (default: {None})
         """
 
         threading.Thread.__init__(self)
-        self.queue = queue
+        self.in_queue = in_queue
         self.out_queue = out_queue
-
-    def input_function(self, f, *args, **kwargs):
-        pass
-
-    def output_function(self, f, *args, **kwargs):
-        pass
 
     def run(self):
         while True:
             # Grabs host from queue
-            f, args, kwargs = self.queue.get()
+            f, args, kwargs = self.in_queue.get()
 
             # Grabs item and put to input_function
-            self.input_function(f, args, kwargs)
-            result = f(*args, **kwargs)
-            self.output_function(f, args, kwargs)
+            result = f(*args, **kwargs), None
+            result = result[:-1]
 
             if self.out_queue is not None:
-                self.out_queue.put(result)
+                self.out_queue.put(*result)
 
             # Signals to queue job is done
-            self.queue.task_done()
+            self.in_queue.task_done()
+
+
+class AsyncProcess(multiprocessing.Process):
+
+    def __init__(self, in_queue, out_queue):
+        multiprocessing.Process.__init__(self)
+        self.in_queue = in_queue
+        self.out_queue = out_queue
+        self.stop_event = multiprocessing.Event()
+
+    def stop(self):
+        self.stop_event.set()
+
+    def run(self):
+        while not self.stop_event.is_set():
+            # Grabs host from queue
+            f, args, kwargs = self.in_queue.get()
+
+            # Grabs item and put to input_function
+            result = f(*args, **kwargs), None
+            result = result[:-1]
+
+            if self.out_queue is not None:
+                self.out_queue.put(*result)
+
+            # Signals to queue job is done
+            self.in_queue.task_done()
+            if self.stop_event.is_set():
+                print('Process %s is stopping' % self.pid)
+                break
 
 
 class DistributedThreads(object):
@@ -68,7 +92,7 @@ class DistributedThreads(object):
 
     def init_worker(self):
         # create list of queue
-        self.queue_list = [Queue() for i in range(self.max_workers)]
+        self.queue_list = [queue.Queue() for i in range(self.max_workers)]
         # create list of threads:
         self.worker_list = []
         for i in range(self.max_workers):
@@ -122,6 +146,52 @@ class DistributedThreads(object):
     def shutdown(self):
         for q in self.queue_list:
             q.join()
+
+
+class DistributedProcess(DistributedThreads):
+    def init_worker(self):
+        # create list of queue
+        self.queue_list = [multiprocessing.JoinableQueue()
+                           for i in range(self.max_workers)]
+        # create list of threads:
+        self.worker_list = []
+        for i in range(self.max_workers):
+            one_worker = AsyncProcess(
+                self.queue_list[i], out_queue=self.out_queue)
+            self.worker_list.append(one_worker)
+            one_worker.start()
+        # create list of watching queue
+        self.watching_list = [deque() for i in range(self.max_workers)]
+
+    def shutdown(self):
+        for q in self.queue_list:
+            q.join()
+        for process in self.worker_list:
+            print('Distributed Process %s is stopping' % process.pid)
+            process.terminate()
+
+
+class Worker(threading.Thread):
+    """Threaded title parser"""
+
+    def __init__(self, out_queue, f):
+        threading.Thread.__init__(self)
+        self.out_queue = out_queue
+        self.f = f
+
+    def run(self):
+        while True:
+            # Grabs chunk from queue
+            args = self.out_queue.get(), None
+
+            # Parse the chunk
+            args = args[:-1]
+            self.f(*args)
+
+            # Signals to queue job is done
+            self.out_queue.task_done()
+
+
 
 class AsyncToSync:
     """
@@ -251,5 +321,3 @@ class SyncToAsync:
 # Lowercase is more sensible for most things
 sync_to_async = SyncToAsync
 async_to_sync = AsyncToSync
-
-

@@ -123,7 +123,7 @@ def TestReceiveJson(a=1, b='string',c=None):
     return {'1':a,'2':b,'3':c}
 
 
-@Micro.route('/json1')
+@Micro.route('/json1', methods=['GET','POST'])
 @Micro.async_json
 async def TestReceiveJson2(a=None):
     return a

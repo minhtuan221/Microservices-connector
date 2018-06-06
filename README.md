@@ -31,7 +31,7 @@ Start project by a minimum example:
 
 * Step 1: Create 1 file name app1.py, write and save with the code below
 
-```
+```python
 from microservices_connector.Interservices import Microservice
 
 Micro = Microservice(__name__)
@@ -46,7 +46,8 @@ if __name__ == '__main__':
 ```
 
 * Step 2: Create 1 file name app2.py, write and save with the code below
-```
+
+```python
 from microservices_connector.Interservices import Friend
 
 aFriend= Friend('app1', 'http://0.0.0.0:5000')
@@ -71,7 +72,7 @@ You get the result: `Welcome Mr. Developer` in terminal of app2.py. This is no d
 
 In the tutorial, we assume you have this code in the top of your file.
 
-```
+```python
 from microservices_connector.Interservices import Microservice
 
 Micro = Microservice(__name__)
@@ -80,7 +81,8 @@ Micro = Microservice(__name__)
 from microservices_connector.Interservices import SanicApp as Microservice
 
 Micro = Microservice(__name__)
-``` 
+```
+
 Now, look closer at `Microservice(__name__)`, it actually look like this: 
     
     Microservice(name, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None)
@@ -97,7 +99,7 @@ The class Microservice is used to create a listener/a microservice. In a file/ap
 * Should use `__name__` for name and name need to be unique
 * If you run multiple listener, use only one unique port for each listener. for example:
 
-```
+```python
 M1 = Microservice(__name__, port=5010) # in file app1
 M2 = Microservice(__name__, port=5020) # in file app2
 ```
@@ -108,14 +110,14 @@ Note: You should be carefully if there are other web applications running in you
 A sender is a python def, so you can put it anywhere in your app. Listener is a http server so it's a bit difference from other.
 
 Option 1: Use if/main in the end of startup file (file that you start your project by `python <filename>`). Add the following code the end:
-```
+```python
 # Micro is your Microservice Object
 if __name__ == '__main__':
     Micro.run()
 ```
 
 Option 2: Create a file name run.py and run your app from this file. For example, we create a run.py in the same folder of app1.py in the first example. It will be like this:
-```
+```python
 from app1 import Micro
 
 if __name__ == '__main__':
@@ -128,7 +130,7 @@ Note: _We assume you already use one of the options above for your code_. This t
 ### 3. Send, Typing and reply
 
 Think like a human, if you want to communicate with some friend in facebook, you will open *messenger*, find your friend and send a message to them. It's a way of sending message to each other. Then, your friend will type a message and reply you. The process is similar here. See the code:
-```
+```python
 aFriend= Friend('Corgi', 'http://0.0.0.0:5000') # this is: you're finding friend in your head. 
 # You can call him with a cute name like 'Puppy','Teddy' or 'Corgi'. 
 # But you must always remember his real-name is 'http://0.0.0.0:5000' to know actually who he is
@@ -139,7 +141,7 @@ message = aFriend.send('/helloworld','Mr. Close friend') # then you can send him
 `/helloworld` is the rule/topic you say/ask to a friend or the route in http. It need to start with `/`. The rule must match with the rule of `Typing` to be replied. `Mr. Close friend` is what you are talking about, which can be string, integer, float, list, dict or class. For example: `aFriend.send('/topic',variable1, variable2, keyword1='secret key')`
 
 In other side, your friend or a microservice or a listener has the following process:
-```
+```python
 @Micro.typing('/helloworld') # this is the rule/topic he knows. If he don't know, he cannot reply
 @Micro.reply # he is replying
 def helloworld(name): # this is the process in side his head
@@ -151,7 +153,7 @@ def helloworld(name): # this is the process in side his head
 ### 4. Send and reply string, integer, float
 
 In the sender side, you can send data type as the code below:
-```
+```python
 print(
     """##############################
     Test return string
@@ -189,7 +191,7 @@ print('y=', y, type(y))
 print('z=', z, type(z))
 ```
 In the listener, you can reply/return data type as string, integer, float as below:
-```
+```python
 # run a normal function in python
 print('one cat here')
 
@@ -248,7 +250,7 @@ Note: print('one cat here') print in the screen of listener. You can run any oth
 ### 5. Send and reply list, dict
 
 In the sender side, you can send data type as the code below:
-```
+```python
 print(
     """##############################
     Test return a list, dict
@@ -270,7 +272,7 @@ print('y=', y, type(y))
 print('z=', z, type(z))
 ```
 In the listener, you can reply/return data type as string, integer, float as below:
-```
+```python
 # test return list and dict
 @Micro.typing('/list')
 @Micro.reply
@@ -311,7 +313,7 @@ z= None <class 'NoneType'>
 ### 6. Send and reply void, Nonetype, class attributes and use of token
 In the sender side, you can send data type as the code below:
 
-```
+```python
 print(
 """##############################
 Test return NoneType, Class, use of Token
@@ -349,7 +351,7 @@ print('z=', z, type(z))
 
 In the listener, you can reply/return data type as string, integer, float as below:
 
-```
+```python
 # return None, class Object
 @Micro.typing('/None')
 @Micro.reply
@@ -411,6 +413,219 @@ y= {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': [{'Purpo
 z= [{'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': [{'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value1'}, {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value2'}]}, {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': {'list': [{'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value1'}, {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value2'}], 't1': {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value1'}, 't2': {'Purpose': 'For test only', 'empty': None, 'name': 'test', 'value': 'value2'}}}] <class 'list'>
 'testClassType'  19.20 ms
 ```
+
+New feature from 0.2.4, now you can send and receive json similar to dict. It helps more readable response
+
+```python
+# in client side
+print('=================Response json===============')
+x = aFriend.json('/json', a=12,b='This is a text',c={'dict':'a dict'})
+print('Synchonous POST:', x)
+y = aFriend.json('/json1', method='GET' , a={'dict': 'a only dict'})
+print('Asynchonous GET:', y)
+z = aFriend.json('/json1', a={'dict': 'a only dict'})
+print('Asynchonous POST:', z)
+```
+In the server side we have:
+
+```python
+# in server side
+@Micro.typing('/json')
+@Micro.json
+@timeit
+def TestReceiveJson(a=1, b='string',c=None):
+    return {'1':a,'2':b,'3':c}
+
+
+# for async request (only apply to sanic)
+@Micro.route('/json1', methods=['GET','POST'])
+@Micro.async_json
+async def TestReceiveJson2(a=None):
+    return a
+```
+
+You can response with get, post, put, delete,... as the method above. The result:
+
+```
+=================Response json===============
+Synchonous POST: {'1': 12, '2': 'This is a text', '3': {'dict': 'a dict'}}
+Asynchonous GET: {'dict': 'a only dict'}
+Asynchonous POST: {'dict': 'a only dict'}
+```
+### 7. From 0.2.7, we support for websocket connection:
+In the sender side, we can send data type as the code below:
+
+```python
+from microservices_connector.minisocket import SocketServer
+sk = SocketServer(__name__)
+@sk.router('/hello')
+def test(message):
+    print(message)
+    return 'ok:'+message
+
+def main():
+    sk.run()
+    # you can put a flask server here
+    # Socket Server run in a seperate threads, not affect flask server
+
+if __name__ == '__main__':
+    main()
+```
+The other option is run minisocket in a different thread, that will alow flask server run seperately.
+
+```python
+sk = SocketServer(__name__)
+app = Microservice('Flask_app').app
+
+@app.route('/')
+def helloworld():
+    time.sleep(2)
+    return 'Sleep 2s before response'
+
+
+@sk.router('/hello')
+def test(message):
+    print(message)
+    return 'ok:'+message
+
+def socket_runner():
+    sk.run()
+
+def main():
+    s = threading.Thread(target=sk.run)
+    s.start()
+    print('start web framework')
+    app.run()
+
+
+if __name__ == '__main__':
+    main()
+
+```
+
+In the client side, we create a socket connection using websocket framework:
+
+```python
+import asyncio
+import websockets
+
+
+async def hello():
+    async with websockets.connect('ws://localhost:8765/hello') as websocket:
+        name = input("What's your name? ")
+        await websocket.send(name)
+        print(f"> {name}")
+        greeting = await websocket.recv()
+        print(f"< {greeting}")
+        while greeting != 'close':
+            name = input("What's your name? ")
+            await websocket.send(name)
+            greeting = await websocket.recv()
+            print(f"< {greeting}")
+
+asyncio.get_event_loop().run_until_complete(hello())
+```
+### 8. From 0.2.7, we support concurrency process with sequences throught DistributedThreads and DistributedProcess :
+
+This give a solution for the problems of concurrency process that many workers simutanously impact/input to a single database row/table/position or the problem of arbitrary order of data. 
+First, if you don't need process a data or queue with order or your data do not input to the same database row/table, you should use celery or other framework to scale your project. For that instance, this framework will provide no more efficient than celery which highly use by now.
+Second, framework need a key for each row/item in data for knowning which want to be ordered. The guide as example below. You need a output_queue for listening the result and continue other function.
+
+```python
+from microservices_connector.spawn import DistributedThreads, DistributedProcess, Worker
+import random
+import time
+import queue
+import threading
+import multiprocessing
+
+def wait_on_b(b):
+    time.sleep(random.random())
+    # b will never complete because it is waiting on a.
+    print('working on b=%s' % b)
+    return 'working on b=%s' % b
+    # return 5
+
+
+def wait_on_a(a):
+    time.sleep(1)
+    # a will never complete because it is waiting on b.
+    return 'working on a=%s' % a
+    # return 6
+
+# example data
+poll = [
+    {'id': 1, 'x': 'Nguyen'},
+    {'id': 1, 'x': 'Minh'},
+    {'id': 1, 'x': 'Tuan'},
+    {'id': 2, 'x': 'Vu'},
+    {'id': 3, 'x': 'Ai do khac'},
+    {'id': 2, 'x': 'Kim'},
+    {'id': 2, 'x': 'Oanh'},
+    {'id': 4, 'x': '1'},
+    {'id': 4, 'x': '2'},
+    {'id': 4, 'x': '3'},
+    {'id': 4, 'x': '4'},
+    {'id': 4, 'x': '5'},
+    {'id': 4, 'x': '6'},
+    {'id': 4, 'x': '7'},
+    {'id': 4, 'x': '8'},
+    {'id': 5, 'x': '101'},
+    {'id': 5, 'x': '102'},
+    {'id': 5, 'x': '103'},
+    {'id': 5, 'x': '104'},
+    {'id': 5, 'x': '105'},
+    {'id': 6, 'x': 'Test watching'},
+    {'id': 6, 'x': 'Test watching'},
+    {'id': 7, 'x': 'Test watching'},
+    {'id': 8, 'x': 'Test watching'},
+    {'id': 9, 'x': 'Test watching'},
+    {'id': 10, 'x': 'Test watching'},
+    {'id': 11, 'x': 'Test watching'},
+    {'id': 12, 'x': 'Test watching'},
+    {'id': 13, 'x': 'Test watching'},
+    {'id': 14, 'x': 'Test watching'},
+    {'id': 15, 'x': 'Test watching'},
+    {'id': 16, 'x': 'Test watching'},
+    {'id': 17, 'x': 'Test watching'},
+    {'id': 18, 'x': 'Test watching'},
+    {'id': 19, 'x': 'Test watching'},
+    {'id': 20, 'x': 'Test watching'},
+    {'id': 21, 'x': 'Test watching'},
+    {'id': 22, 'x': 'Test watching'},
+]
+def main():
+    start = time.time()
+
+    thread_out_queue = queue.Queue()
+    pool = DistributedThreads(
+        max_workers=4, max_watching=100, out_queue=thread_out_queue)
+    for item in poll:
+        pool.submit_id(item['id'], wait_on_a, item)
+    t = Worker(thread_out_queue, print)
+    t.daemon = True
+    t.start()
+    pool.shutdown()
+    print('Finish after: ', time.time()-start, 'seconds')
+
+    print("========= End of threads ==============")
+
+    process_out_queue = multiprocessing.Queue()
+    pool2 = DistributedProcess(
+        max_workers=4, max_watching=100, out_queue=process_out_queue)
+    for item in poll:
+        pool2.submit_id(item['id'], wait_on_b, item)
+    pool2.shutdown()
+
+    print('Finish after: ', time.time()-start, 'seconds')
+
+
+if __name__ == '__main__':
+    main()
+```
+
+As the result, all name and number will same id will print in the exact order. Max watching should not be lesser than 100. If you put key/id to None or use submit instead of submit_id, it will do no order but faster.
+
 A Detail User Guide will comming soon...
 ## Pros vs Cons and question
 From my opinion only, Microservice connector has the following Pros and Cons to improve

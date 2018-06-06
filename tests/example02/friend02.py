@@ -210,10 +210,14 @@ def testClassType():
     print('x=', x, type(x))
     print('y=', y, type(y))
     print('z=', z, type(z))
+
+    print('=================Response json===============')
     x = aFriend.json('/json', a=12,b='This is a text',c={'dict':'a dict'})
-    print(x)
-    y = aFriend.json('/json1', a={'dict': 'a only dict'})
-    print(y)
+    print('Synchonous POST:', x)
+    y = aFriend.json('/json1', method='GET' , a={'dict': 'a only dict'})
+    print('Asynchonous GET:', y)
+    z = aFriend.json('/json1', a={'dict': 'a only dict'})
+    print('Asynchonous POST:', z)
 
 
 
