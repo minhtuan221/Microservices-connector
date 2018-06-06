@@ -11,42 +11,117 @@ import uvloop
 # asyncio.set_event_loop(loop)
 import queue
 import time
+from collections import deque
+from queue import Queue
+import threading
+import random
+
 
 class AsyncThread(threading.Thread):
-    """Threaded website reader"""
+    """Threaded Async reader, read data from queue"""
 
-    def __init__(self, queue, out_queue):
+    def __init__(self, queue, out_queue=None):
+        """Threaded Async reader, read data from queue
+        
+        Arguments:
+            queue {[type]} -- queue or deque
+        
+        Keyword Arguments:
+            out_queue {[type]} -- queue receive result (default: {None})
+        """
+
         threading.Thread.__init__(self)
         self.queue = queue
         self.out_queue = out_queue
 
+    def input_function(self, f, *args, **kwargs):
+        pass
+
+    def output_function(self, f, *args, **kwargs):
+        pass
+
     def run(self):
         while True:
             # Grabs host from queue
-            host = self.queue.get()
+            f, args, kwargs = self.queue.get()
 
-            # Grabs urls of hosts and then grabs chunk of webpage
-            time.sleep(2)
-            print("Reading: %s" % host)
+            # Grabs item and put to input_function
+            self.input_function(f, args, kwargs)
+            result = f(*args, **kwargs)
+            self.output_function(f, args, kwargs)
+
+            if self.out_queue is not None:
+                self.out_queue.put(result)
 
             # Signals to queue job is done
             self.queue.task_done()
 
 
-# queue = queue.Queue()
-# for i in range(5):
-#     t = ThreadNumber(queue, 'out_queue')
-#     t.daemon = True
-#     threads.append(t)
-#     t.start()
-# hosts = [i for i in range(20)]
-# # Populate queue with data
-# for host in hosts:
-#     queue.put(host)
-# Wait on the queue until everything has been processed
-# queue.join()
-# for t in threads:
-#     t.join()
+class DistributedThreads(object):
+
+    def __init__(self, out_queue=None, max_workers=4, max_watching=100):
+        self.out_queue = out_queue
+        self.max_workers = max_workers
+        self.max_watching = max_watching
+        self.current_id = 0
+        self.init_worker()
+
+    def init_worker(self):
+        # create list of queue
+        self.queue_list = [Queue() for i in range(self.max_workers)]
+        # create list of threads:
+        self.worker_list = []
+        for i in range(self.max_workers):
+            one_worker = AsyncThread(
+                self.queue_list[i], out_queue=self.out_queue)
+            one_worker.daemon = True
+            self.worker_list.append(one_worker)
+            one_worker.start()
+        # create list of watching queue
+        self.watching_list = [deque() for i in range(self.max_workers)]
+
+    def iterate_queue(self, watching: list, key):
+        if key not in watching and key is not None:
+            watching.append(key)
+        if len(watching) > self.max_watching:
+            watching.popleft()
+            # print('pop one left', watching)
+
+    def choose_worker(self):
+        return (self.current_id+1) % self.max_workers
+
+    def submit(self, f, *args, **kwargs):
+        return self.submit_id(None, f, *args, **kwargs)
+
+    def submit_id(self, key, f, *args, **kwargs):
+        worker_id = None
+        # check if key belong to any worker
+        if key is not None:
+            for i in range(self.max_workers):
+                if key in self.watching_list[i]:
+                    if worker_id is not None:
+                        raise ValueError("Key belong to more than one worker")
+                    worker_id = i
+                    self.current_id = worker_id
+                    break
+        # choosing a work_id if not
+        if worker_id is None:
+            worker_id = self.choose_worker()
+            # print('choose queue =>', worker_id)
+            self.current_id = worker_id
+        # assign to worker and watching list
+        worker = self.queue_list[worker_id]
+        watching = self.watching_list[worker_id]
+
+        # add key to a watching
+        self.iterate_queue(watching, key)
+        # print(worker_id, watching)
+        # add function to queue
+        worker.put((f, args, kwargs))
+
+    def shutdown(self):
+        for q in self.queue_list:
+            q.join()
 
 class AsyncToSync:
     """
@@ -176,3 +251,5 @@ class SyncToAsync:
 # Lowercase is more sensible for most things
 sync_to_async = SyncToAsync
 async_to_sync = AsyncToSync
+
+
