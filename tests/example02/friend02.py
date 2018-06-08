@@ -219,6 +219,11 @@ def testClassType():
     z = aFriend.json('/json1', a={'dict': 'a only dict'})
     print('Asynchonous POST:', z)
 
+    t = aFriend.json('/get/none', method='GET')
+    print('Synchonous GET:', t)
+    q = aFriend.json('/post/none', method='POST')
+    print('Synchonous POST:', q)
+
 
 
 testClassType()

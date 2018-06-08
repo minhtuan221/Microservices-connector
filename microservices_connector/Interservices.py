@@ -102,8 +102,9 @@ class Microservice(object):
         @wraps(f)
         def wrapper(*args, **kwargs):
             content = request.get_json(silent=True)
-            for key in content:
-                kwargs[key] = content[key]
+            if content is not None:
+                for key in content:
+                    kwargs[key] = content[key]
             return self.microResponse(f(*args, **kwargs))
         return wrapper
 

@@ -5,7 +5,12 @@ import threading
 import websockets
 import uvloop
 import time
+import websocket
 
+
+
+def SocketClient(host='localhost:8765',url='/'):
+    return websocket.create_connection(f'{host}{url}')
 
 
 class SocketServer(threading.Thread):

@@ -129,6 +129,17 @@ async def TestReceiveJson2(a=None):
     return a
 
 
+@Micro.typing('/get/none', methods=['GET', 'POST'])
+@Micro.json
+def TestReceiveJsonGet():
+    return {'1': 'a', '2': 'b', '3': 'c'}
+
+
+@Micro.typing('/post/none', methods=['GET', 'POST'])
+@Micro.json
+def TestReceiveJsonNone():
+    return {'1': 'a', '2': 'b', '3': 'c'}
+
 # Option 1: run Microservice within file it's created
 if __name__ == '__main__':
     Micro.run(port=5000, host='0.0.0.0', debug=True)
