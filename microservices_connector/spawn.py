@@ -21,7 +21,7 @@ import multiprocessing
 class AsyncThread(threading.Thread):
     """Threaded Async reader, read data from queue"""
 
-    def __init__(self, in_queue, out_queue=None):
+    def __init__(self, in_queue, out_queue=None, name=None):
         """Threaded Async reader, read data from queue
 
         Arguments:
@@ -31,9 +31,12 @@ class AsyncThread(threading.Thread):
             out_queue {[type]} -- queue receive result (default: {None})
         """
 
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self, name=name)
         self.in_queue = in_queue
         self.out_queue = out_queue
+    
+    def main_process(self, f, *args, **kwargs):
+        return f(*args, **kwargs)
 
     def run(self):
         while True:
@@ -41,7 +44,7 @@ class AsyncThread(threading.Thread):
             f, args, kwargs = self.in_queue.get()
 
             # Grabs item and put to input_function
-            result = f(*args, **kwargs), None
+            result = self.main_process(f, *args, *kwargs), None
             result = result[:-1]
 
             if self.out_queue is not None:
@@ -53,14 +56,17 @@ class AsyncThread(threading.Thread):
 
 class AsyncProcess(multiprocessing.Process):
 
-    def __init__(self, in_queue, out_queue):
-        multiprocessing.Process.__init__(self)
+    def __init__(self, in_queue, out_queue, name=None):
+        multiprocessing.Process.__init__(self, name=name)
         self.in_queue = in_queue
         self.out_queue = out_queue
         self.stop_event = multiprocessing.Event()
 
     def stop(self):
         self.stop_event.set()
+    
+    def main_process(self, f, *args, **kwargs):
+        return f(*args, **kwargs)
 
     def run(self):
         while not self.stop_event.is_set():
@@ -68,7 +74,7 @@ class AsyncProcess(multiprocessing.Process):
             f, args, kwargs = self.in_queue.get()
 
             # Grabs item and put to input_function
-            result = f(*args, **kwargs), None
+            result = self.main_process(f, *args, *kwargs), None
             result = result[:-1]
 
             if self.out_queue is not None:
@@ -97,7 +103,7 @@ class DistributedThreads(object):
         self.worker_list = []
         for i in range(self.max_workers):
             one_worker = AsyncThread(
-                self.queue_list[i], out_queue=self.out_queue)
+                self.queue_list[i], out_queue=self.out_queue, name=i)
             one_worker.daemon = True
             self.worker_list.append(one_worker)
             one_worker.start()
@@ -110,9 +116,21 @@ class DistributedThreads(object):
         if len(watching) > self.max_watching:
             watching.popleft()
             # print('pop one left', watching)
+    
+    def next_worker(self, last_id):
+        return (last_id+1) % self.max_workers
+    
+    def check_next_queue(self, current_queue_size, last_id):
+        next_id = self.next_worker(last_id)
+        if current_queue_size>=self.queue_list[next_id].qsize():
+            return next_id
+        else:
+            return self.check_next_queue(current_queue_size,next_id)
 
     def choose_worker(self):
-        return (self.current_id+1) % self.max_workers
+        current_queue_size = self.queue_list[self.current_id].qsize()
+        return self.check_next_queue(current_queue_size, self.current_id)
+        # return (self.current_id+1) % self.max_workers
 
     def submit(self, f, *args, **kwargs):
         return self.submit_id(None, f, *args, **kwargs)
@@ -157,11 +175,14 @@ class DistributedProcess(DistributedThreads):
         self.worker_list = []
         for i in range(self.max_workers):
             one_worker = AsyncProcess(
-                self.queue_list[i], out_queue=self.out_queue)
+                self.queue_list[i], out_queue=self.out_queue, name=i)
             self.worker_list.append(one_worker)
             one_worker.start()
         # create list of watching queue
         self.watching_list = [deque() for i in range(self.max_workers)]
+
+    def choose_worker(self):
+        return (self.current_id+1) % self.max_workers
 
     def shutdown(self):
         for q in self.queue_list:

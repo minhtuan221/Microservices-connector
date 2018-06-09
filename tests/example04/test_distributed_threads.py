@@ -6,7 +6,7 @@ import threading
 import multiprocessing
 import random
 import time
-
+import spawn
 
 def wait_on_b(b):
     time.sleep(random.random())
@@ -249,12 +249,12 @@ def main():
     start = time.time()
 
     thread_out_queue = queue.Queue()
-    pool = DistributedThreads(
+    pool = spawn.DistributedThreads(
         max_workers=4, max_watching=100, out_queue=thread_out_queue)
     for item in poll:
         pool.submit_id(item['id'], wait_on_a, item)
         # print(thread_out_queue.get())
-    t = Worker(thread_out_queue, print)
+    t = spawn.Worker(thread_out_queue, print)
     t.daemon = True
     t.start()
     pool.shutdown()
@@ -263,7 +263,7 @@ def main():
     print("========= End of threads ==============")
 
     process_out_queue = multiprocessing.Queue()
-    pool2 = DistributedProcess(
+    pool2 = spawn.DistributedProcess(
         max_workers=4, max_watching=100, out_queue=process_out_queue)
     for item in poll:
         pool2.submit_id(item['id'], wait_on_b, item)

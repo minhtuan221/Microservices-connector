@@ -20,8 +20,7 @@ def socket_runner():
     sk.run()
 
 def main():
-    s = threading.Thread(target=sk.run)
-    s.start()
+    socket_runner()
     print('start web framework')
     app.run()
 

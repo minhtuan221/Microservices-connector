@@ -41,10 +41,15 @@ class SocketServer(threading.Thread):
         else:
             await websocket.send('Websocket close: path does not exist')
 
-    def run(self, host='localhost', port=8765):
-        print("Starting socket in %s:%s" % (host,port))
+    def server(self, host='127.0.0.1', port=8765):
+        print("Starting socket in %s:%s" % (host, port))
         loop = uvloop.new_event_loop()
         asyncio.set_event_loop(loop)
         start_server = websockets.serve(self.connect, host, port)
         loop.run_until_complete(start_server)
         loop.run_forever()
+
+    def run(self, host='127.0.0.1', port=8765):
+        s = threading.Thread(target=self.server, args=(host, port))
+        s.daemon = True
+        s.start()
