@@ -89,21 +89,25 @@ class AsyncProcess(multiprocessing.Process):
 
 class DistributedThreads(object):
 
-    def __init__(self, out_queue=None, max_workers=4, max_watching=100):
+    def __init__(self, out_queue=None, max_workers=4, max_watching=100, worker=None, maxsize=0):
         self.out_queue = out_queue
         self.max_workers = max_workers
         self.max_watching = max_watching
         self.current_id = 0
-        self.init_worker()
+        self.max_qsize = maxsize
+        if worker is None:
+            self.init_worker()
+        else:
+            self.init_worker(worker=worker)
 
-    def init_worker(self):
+    def init_worker(self, worker=AsyncThread):
         # create list of queue
-        self.queue_list = [queue.Queue() for i in range(self.max_workers)]
+        self.queue_list = [queue.Queue(maxsize=self.max_qsize) for i in range(self.max_workers)]
         # create list of threads:
         self.worker_list = []
         for i in range(self.max_workers):
-            one_worker = AsyncThread(
-                self.queue_list[i], out_queue=self.out_queue, name=i)
+            one_worker = worker(
+                self.queue_list[i], out_queue=self.out_queue, name=str(i))
             one_worker.daemon = True
             self.worker_list.append(one_worker)
             one_worker.start()
@@ -149,7 +153,7 @@ class DistributedThreads(object):
         # choosing a work_id if not
         if worker_id is None:
             worker_id = self.choose_worker()
-            print('choose queue =>', worker_id)
+            # print('choose queue =>', worker_id)
             self.current_id = worker_id
         # assign to worker and watching list
         worker = self.queue_list[worker_id]
@@ -157,7 +161,7 @@ class DistributedThreads(object):
 
         # add key to a watching
         self.iterate_queue(watching, key)
-        print(worker_id, watching)
+        # print(worker_id, watching)
         # add function to queue
         worker.put((f, args, kwargs))
 
@@ -167,15 +171,15 @@ class DistributedThreads(object):
 
 
 class DistributedProcess(DistributedThreads):
-    def init_worker(self):
+    def init_worker(self, worker=AsyncProcess):
         # create list of queue
         self.queue_list = [multiprocessing.JoinableQueue()
                            for i in range(self.max_workers)]
         # create list of threads:
         self.worker_list = []
         for i in range(self.max_workers):
-            one_worker = AsyncProcess(
-                self.queue_list[i], out_queue=self.out_queue, name=i)
+            one_worker = worker(
+                self.queue_list[i], out_queue=self.out_queue, name=str(i))
             self.worker_list.append(one_worker)
             one_worker.start()
         # create list of watching queue
