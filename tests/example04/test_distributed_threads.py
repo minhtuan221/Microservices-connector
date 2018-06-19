@@ -9,14 +9,14 @@ import time
 import spawn
 
 def wait_on_b(b):
-    print('working on b=%s' % b)
+    # print('working on b=%s' % b)
     time.sleep(random.random())
     return 'working on b=%s' % b
     # return 5
 
 
 def wait_on_a(a):
-    print('working on a=%s' % a)
+    # print('working on a=%s' % a)
     time.sleep(1)
     return a
     # return 6
@@ -70,11 +70,12 @@ def Print_out(q):
 
 
 def main():
-    start = time.time()
 
     thread_out_queue = queue.Queue()
     pool = spawn.DistributedThreads(
         max_workers=4, max_watching=100, out_queue=thread_out_queue)
+
+    start = time.time()
     for item in poll:
         pool.submit_id(item['id'], wait_on_a, item)
         # print(thread_out_queue.get())
@@ -88,15 +89,15 @@ def main():
 
     print("========= End of threads ==============")
 
-    process_out_queue = multiprocessing.Queue()
-    pool2 = spawn.DistributedProcess(
-        max_workers=4, max_watching=100, out_queue=process_out_queue)
-    for item in poll:
-        pool2.submit_id(item['id'], wait_on_a, item)
-    # process = Worker(process_out_queue, print)
-    # process.daemon = True
-    # process.start()
-    pool2.shutdown()
+    # process_out_queue = multiprocessing.Queue()
+    # pool2 = spawn.DistributedProcess(
+    #     max_workers=4, max_watching=100, out_queue=process_out_queue)
+    # for item in poll:
+    #     pool2.submit_id(item['id'], wait_on_a, item)
+    # # process = Worker(process_out_queue, print)
+    # # process.daemon = True
+    # # process.start()
+    # pool2.shutdown()
 
     print('Finish after: ', time.time()-start, 'seconds')
 
