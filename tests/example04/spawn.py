@@ -34,7 +34,7 @@ class AsyncThread(threading.Thread):
         threading.Thread.__init__(self, name=name)
         self.in_queue = in_queue
         self.out_queue = out_queue
-    
+
     def main_process(self, f, *args, **kwargs):
         return f(*args, **kwargs)
 
@@ -64,7 +64,7 @@ class AsyncProcess(multiprocessing.Process):
 
     def stop(self):
         self.stop_event.set()
-    
+
     def main_process(self, f, *args, **kwargs):
         return f(*args, **kwargs)
 
@@ -102,7 +102,8 @@ class DistributedThreads(object):
 
     def init_worker(self, worker=AsyncThread):
         # create list of queue
-        self.queue_list = [queue.Queue(maxsize=self.max_qsize) for i in range(self.max_workers)]
+        self.queue_list = [queue.Queue(maxsize=self.max_qsize)
+                           for i in range(self.max_workers)]
         # create list of threads:
         self.worker_list = []
         for i in range(self.max_workers):
@@ -115,21 +116,21 @@ class DistributedThreads(object):
         self.watching_list = [deque() for i in range(self.max_workers)]
 
     def iterate_queue(self, watching: list, key):
-        if key not in watching and key is not None:
+        if key is not None:
             watching.append(key)
         if len(watching) > self.max_watching:
             watching.popleft()
             # print('pop one left', watching)
-    
+
     def next_worker(self, last_id):
         return (last_id+1) % self.max_workers
-    
+
     def check_next_queue(self, current_queue_size, last_id):
         next_id = self.next_worker(last_id)
-        if current_queue_size>=self.queue_list[next_id].qsize():
+        if current_queue_size >= self.queue_list[next_id].qsize():
             return next_id
         else:
-            return self.check_next_queue(current_queue_size,next_id)
+            return self.check_next_queue(current_queue_size, next_id)
 
     def choose_worker(self):
         current_queue_size = self.queue_list[self.current_id].qsize()
@@ -215,7 +216,6 @@ class Worker(threading.Thread):
 
             # Signals to queue job is done
             self.out_queue.task_done()
-
 
 
 class AsyncToSync:

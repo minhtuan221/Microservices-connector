@@ -1,8 +1,8 @@
-# from minisocket import SocketServer
+from minisocket import SocketServer
 from microservices_connector.Interservices import Microservice
 import threading, time
 from cython_npm.cythoncompile import require
-SocketServer = require('../../microservices_connector/minisocket').SocketServer
+# SocketServer = require('../../microservices_connector/minisocket').SocketServer
 
 sk = SocketServer(__name__)
 app = Microservice('Flask_app').app

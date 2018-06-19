@@ -30,24 +30,16 @@ class SocketServer(threading.Thread):
 
     route = router
 
-    def add_route(self, rule, handler):
+    def add_route(self, rule, handler, middleware=None):
+        if middleware is None:
+            middleware = self.basic_middleware
         args = ArgsParse(rule)
         if args.is_hashable():
-            self.url[rule] = handler
+            self.url[rule] = handler, middleware
         else:
-            self.url_args[rule] = handler
+            self.url_args[rule] = handler, middleware
 
-    async def handle_immutalble_route(self, websocket, path):
-        handler = self.url[path]
-        message = '?'
-        while message != 'exit':
-            message = await websocket.recv()
-            reply = handler(message)
-            if reply is not None:
-                await websocket.send(reply)
-
-    async def handle_mutalble_route(self, websocket, path, *args):
-        handler = self.url_args[path]
+    async def basic_middleware(self, websocket, handler, *args):
         message = '?'
         while message != 'exit':
             message = await websocket.recv()
@@ -55,19 +47,32 @@ class SocketServer(threading.Thread):
             if reply is not None:
                 await websocket.send(reply)
 
+    async def handle_immutalble_route(self, websocket, path, *args):
+        handler, middleware = self.url[path]
+        await middleware(websocket, handler, *args)
+
+    async def handle_mutalble_route(self, websocket, path, *args):
+        handler, middleware = self.url_args[path]
+        await middleware(websocket, handler, *args)
+
     async def connect(self, websocket, path):
         # check if url is immutalble or contain args
         if path in self.url:
             await self.handle_immutalble_route(websocket, path)
         else:
+            matched_rule = None
             for rule in self.url_args:
                 args = ArgsParse(rule)
                 if args.parse(path) is not None:
+                    matched_rule = rule
+                    break
+            if matched_rule:
                     await self.handle_mutalble_route(websocket, rule, *args.parse(path))
-            await websocket.send('Websocket close: path does not exist')
+            else:
+                await websocket.send('Websocket close: path does not exist')
 
     def server(self, host='127.0.0.1', port=8765):
-        print("Starting socket production in %s:%s" % (host, port))
+        print("Starting socket in %s:%s" % (host, port))
         loop = uvloop.new_event_loop()
         asyncio.set_event_loop(loop)
         start_server = websockets.serve(self.connect, host, port)

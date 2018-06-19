@@ -11,7 +11,7 @@ def hello(ws):
         greeting = ws.recv()
         print(f"< {greeting}")
         if name == 'exit':
-            break;
+            break
 
 hello(ws)
 

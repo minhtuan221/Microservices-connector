@@ -116,7 +116,7 @@ class DistributedThreads(object):
         self.watching_list = [deque() for i in range(self.max_workers)]
 
     def iterate_queue(self, watching: list, key):
-        if key not in watching and key is not None:
+        if key is not None:
             watching.append(key)
         if len(watching) > self.max_watching:
             watching.popleft()
