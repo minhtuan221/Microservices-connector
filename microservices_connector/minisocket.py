@@ -7,7 +7,7 @@ import websocket
 import uvloop
 import time
 import threading
-from .url_parser.url_namespace import ArgsParse
+from microservices_connector.url_parser.url_namespace import ArgsParse
 
 
 def SocketClient(host='localhost:8765', url='/'):
