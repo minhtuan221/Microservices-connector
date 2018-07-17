@@ -1,8 +1,8 @@
-from minisocket import SocketServer
+# from minisocket import SocketServer
 from microservices_connector.Interservices import Microservice
 import threading, time
 from cython_npm.cythoncompile import require
-# SocketServer = require('../../microservices_connector/minisocket').SocketServer
+SocketServer = require('../../microservices_connector/minisocket').SocketServer
 
 sk = SocketServer(__name__)
 app = Microservice('Flask_app').app
@@ -13,16 +13,25 @@ def helloworld():
     return 'Sleep 2s before response'
 
 
-@sk.router('/hello/<name>')
+@sk.route('/hello/<name>')
 def test(message, name):
     print(message,'hello:'+name)
     return 'hello:'+message
 
 
-@sk.router('/xinchao')
+@sk.route('/xinchao')
 def test2(message):
     print(message, 'End:')
     return 'xinchao:'+message
+
+
+@sk.render('/render')
+async def test3(ws, message):
+    print(message, 'received')
+    await ws.send('Render 1:'+message)
+    x = await ws.recv()
+    print(x, type(x))
+    ws.close()
 
 def socket_runner():
     sk.run()

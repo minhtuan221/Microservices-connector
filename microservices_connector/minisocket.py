@@ -13,6 +13,9 @@ from microservices_connector.url_parser.url_namespace import ArgsParse
 def SocketClient(host='localhost:8765', url='/'):
     return websocket.create_connection(f'ws://{host}{url}')
 
+async def raw_middleware(websocket, handler, *args):
+    message = await websocket.recv()
+    await handler(websocket, message, *args)
 
 class SocketServer(threading.Thread):
     def __init__(self, name=__file__):
@@ -30,8 +33,15 @@ class SocketServer(threading.Thread):
 
     route = router
 
+    def render(self, rule):
+        def response(handler):
+            self.add_route(rule, handler, middleware=raw_middleware)
+            return handler
+        return response
+
     def add_route(self, rule, handler, middleware=None):
         if middleware is None:
+            print(rule, 'middelware is None')
             middleware = self.basic_middleware
         args = ArgsParse(rule)
         if args.is_hashable():

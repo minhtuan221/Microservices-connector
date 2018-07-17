@@ -12,7 +12,7 @@ import os
 # import aiohttp_debugtoolbar
 # from aiohttp_debugtoolbar import toolbar_middleware_factory
 
-def split_to_equal_text(text, lenght=250):
+def split_to_equal_text(text, lenght=25000):
     return [text[start:start+lenght] for start in range(0, len(text), lenght)]
 
 @stream_with_context
