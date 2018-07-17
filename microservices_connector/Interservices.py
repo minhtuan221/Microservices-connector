@@ -1,5 +1,5 @@
-from flask import Flask
-from flask import request, jsonify
+from flask import Flask, stream_with_context
+from flask import request, jsonify, Response
 import inspect
 import json
 from functools import wraps
@@ -12,6 +12,13 @@ import os
 # import aiohttp_debugtoolbar
 # from aiohttp_debugtoolbar import toolbar_middleware_factory
 
+def split_to_equal_text(text, lenght=250):
+    return [text[start:start+lenght] for start in range(0, len(text), lenght)]
+
+@stream_with_context
+def stream_generate(splited_text):
+    for text in splited_text:
+        yield text
 
 def timeit(method):
 
@@ -29,8 +36,8 @@ def timeit(method):
 
 class Microservice(object):
     
-    def __init__(self, name, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None, **kwargs):
-        """Microservice(name, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None)
+    def __init__(self, name, port: int=5000, host: str='0.0.0.0', debug=None, token = {}, secretKey=None, **kwargs):
+        """Microservice(name, port: int=5000, host: str='0.0.0.0', debug=None, token = {}, secretKey=None)
 
         Arguments:
             name {str} -- Require a name for your app, recommend put __name__ for it
@@ -116,6 +123,16 @@ class Microservice(object):
                 for key in content:
                     kwargs[key] = content[key]
             return jsonify(oneResponse(f(*args, **kwargs)))
+        return wrapper
+    
+    def stream(self, f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            content = request.get_json(silent=True)
+            if content is not None:
+                for key in content:
+                    kwargs[key] = content[key]
+            return Response(stream_generate(json.dumps(f(*args, **kwargs))), mimetype='application/json')
         return wrapper
 
     def run(self, port=None, host=None, debug=None):
@@ -318,7 +335,7 @@ from sanic import response
 
 
 class SanicApp(Microservice):
-    def __init__(self, name=None, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None, **kwargs):
+    def __init__(self, name=None, port: int=5000, host: str='0.0.0.0', debug=None, token = {}, secretKey=None, **kwargs):
         """SanicApp(name, port: int=5000, host: str='0.0.0.0', debug=None, token: dict = {}, secretKey=None)
 
         Arguments:

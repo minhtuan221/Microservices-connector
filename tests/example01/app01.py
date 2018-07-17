@@ -1,5 +1,6 @@
 from cython_npm.cythoncompile import require
 from functools import wraps
+import json
 module = require('../../microservices_connector/Interservices')
 Microservice = module.Microservice
 
@@ -111,6 +112,65 @@ def TestOne():
 @Micro.dict
 def TestOne2():
     return {'data':'something'}
+
+
+@Micro.route('/stream', methods=['POST', 'GET'])
+@Micro.stream
+def Teststream():
+    list_text = [{
+        "acType": "2030",
+        "accountNo": "3101001226",
+        "approve_by": "",
+        "defer_status": "",
+        "defer_to": "2018-07-18 13:00:00",
+        "description": "",
+        "event": "AccCall",
+        "initialAddingAmount": 25103.0,
+        "initialAddingAmount3": 25103.0,
+        "initialRate": 100,
+        "is_approve": "-",
+        "job": "startday_record_acc_call_status",
+        "liquidAddingAmount": 25103.0,
+        "liquidAddingAmount3": 25103.0,
+        "liquidationRate": 85.0,
+        "maintanaceAddingAmount": 25103.0,
+        "maintanaceAddingAmount3": 25103.0,
+        "maintenanceRate": 90.0,
+        "note": "startday_record_acc_call_status",
+        "referid": 61,
+        "rtt": 0.0,
+        "rtt3": 0.0,
+        "status": "force_sell",
+        "update_time": "2018-07-17 14:07:58.129899"
+    },
+        {
+        "acType": "2030",
+        "accountNo": "0101001069",
+        "approve_by": "",
+        "defer_status": "",
+        "defer_to": "2018-07-18 13:00:00",
+        "description": "",
+        "event": "AccCall",
+        "initialAddingAmount": 407847512.0,
+        "initialAddingAmount3": 407847512.0,
+        "initialRate": 100,
+        "is_approve": "-",
+        "job": "startday_record_acc_call_status",
+        "liquidAddingAmount": 407846643.76,
+        "liquidAddingAmount3": 407846643.76,
+        "liquidationRate": 85.0,
+        "maintanaceAddingAmount": 407846965.33,
+        "maintanaceAddingAmount3": 407846965.33,
+        "maintenanceRate": 90.0,
+        "note": "startday_record_acc_call_status",
+        "referid": 19,
+        "rtt": 0.0,
+        "rtt3": 0.0,
+        "status": "force_sell",
+        "update_time": "2018-07-17 14:07:58.130381"
+    }]
+    alist = [12,32,'acsaddfa', 1.3]
+    return list_text
 
 # Option 1: run Microservice within file it's created
 if __name__ == '__main__':
