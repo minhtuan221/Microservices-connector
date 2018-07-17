@@ -108,6 +108,16 @@ class Microservice(object):
             return self.microResponse(f(*args, **kwargs))
         return wrapper
 
+    def dict(self, f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            content = request.get_json(silent=True)
+            if content is not None:
+                for key in content:
+                    kwargs[key] = content[key]
+            return jsonify(oneResponse(f(*args, **kwargs)))
+        return wrapper
+
     def run(self, port=None, host=None, debug=None):
         if port is None:
             port = self.port
@@ -397,10 +407,19 @@ class SanicApp(Microservice):
             return self.microResponse(f(*args, **kwargs))
         return wrapper
 
+    def dict(self, f):
+        @wraps(f)
+        def wrapper(sanicRequest, *args, **kwargs):
+            content = sanicRequest.json or []
+            for key in content:
+                kwargs[key] = content[key]
+            return response.json(oneResponse(f(*args, **kwargs)))
+        return wrapper
+
     def async_json(self, f):
         @wraps(f)
         async def wrapper(sanicRequest, *args, **kwargs):
-            content = sanicRequest.json
+            content = sanicRequest.json or []
             for key in content:
                 kwargs[key] = content[key]
             return self.microResponse(await f(*args, **kwargs))

@@ -140,6 +140,18 @@ def TestReceiveJsonGet():
 def TestReceiveJsonNone():
     return {'1': 'a', '2': 'b', '3': 'c'}
 
+
+@Micro.route('/one', methods=['POST', 'GET'])
+@Micro.dict
+def TestOne():
+    return [12121212]
+
+
+@Micro.route('/one2', methods=['POST', 'GET'])
+@Micro.dict
+def TestOne2():
+    return {'data': 'something'}
+
 # Option 1: run Microservice within file it's created
 if __name__ == '__main__':
     Micro.run(port=5000, host='0.0.0.0', debug=True)
