@@ -13,9 +13,11 @@ from microservices_connector.url_parser.url_namespace import ArgsParse
 def SocketClient(host='localhost:8765', url='/'):
     return websocket.create_connection(f'ws://{host}{url}')
 
+
 async def raw_middleware(websocket, handler, *args):
     message = await websocket.recv()
     await handler(websocket, message, *args)
+
 
 class SocketServer(threading.Thread):
     def __init__(self, name=__file__):
@@ -23,7 +25,7 @@ class SocketServer(threading.Thread):
         self.name = name
         self.url = {}
         self.url_args = {}
-        self.timeout = 1000*1000*60
+        self.timeout = 1000 * 60
 
     def router(self, rule):
         def response(handler):
@@ -40,7 +42,7 @@ class SocketServer(threading.Thread):
         return response
 
     def add_route(self, rule, handler, middleware=None):
-        if middleware is None:
+        if not middleware:
             print(rule, 'middelware is None')
             middleware = self.basic_middleware
         args = ArgsParse(rule)
@@ -52,10 +54,13 @@ class SocketServer(threading.Thread):
     async def basic_middleware(self, websocket, handler, *args):
         message = '?'
         while message != 'exit':
-            message = await websocket.recv()
-            reply = handler(message, *args)
-            if reply is not None:
-                await websocket.send(reply)
+            try:
+                message = await websocket.recv()
+                reply = handler(message, *args)
+                if reply is not None:
+                    await websocket.send(reply)
+            except:
+                traceback.print_exc()
 
     async def handle_immutalble_route(self, websocket, path, *args):
         handler, middleware = self.url[path]
@@ -77,7 +82,7 @@ class SocketServer(threading.Thread):
                     matched_rule = rule
                     break
             if matched_rule:
-                    await self.handle_mutalble_route(websocket, rule, *args.parse(path))
+                await self.handle_mutalble_route(websocket, rule, *args.parse(path))
             else:
                 await websocket.send('Websocket close: path does not exist')
 
